@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Base.ViewModel;
+﻿using Base.ViewModel;
+using KinectLib.Classes;
+using KinectLib.ControlStrategy;
 using LightBuzz.Vitruvius;
 using Microsoft.Kinect;
+using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using KinectLib.Classes;
-using KinectLib.ControlStrategy;
-using Newtonsoft.Json;
 using WpfClient.Enums;
 using WpfClient.Extensions;
+using WpfClient.Properties;
 using WpfClient.Proxy;
 using TabItem = WpfClient.Enums.TabItem;
 
@@ -25,7 +25,7 @@ namespace WpfClient
         #region Fields
         private readonly KinectSensor _sensor = KinectSensor.GetDefault();
         private readonly MultiSourceFrameReader _reader;
-        private readonly DrawingGroup _skeletonDrawingGroup = new DrawingGroup();
+        private readonly bool _saveJson;
 
         // Webservice Timer
         private readonly Timer _webServiceTimer;
@@ -37,6 +37,8 @@ namespace WpfClient
         #region Constructor
         public MainViewModel()
         {
+            _saveJson = Settings.Default.SaveJson;
+
             _reader = _sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Infrared | FrameSourceTypes.Body | FrameSourceTypes.BodyIndex);
             _reader.MultiSourceFrameArrived += Reader_MultiSourceFrameArrived;
 
@@ -44,7 +46,7 @@ namespace WpfClient
 
             _sensor.Open();
 
-            StatusText = _sensor.IsAvailable ? Properties.Resources.RunningStatusText : Properties.Resources.NoSensorStatusText;
+            StatusText = _sensor.IsAvailable ? Resources.RunningStatusText : Resources.NoSensorStatusText;
 
             // Webservice Timer
             _webServiceTimer = new Timer(60);
@@ -156,6 +158,34 @@ namespace WpfClient
             _sensor?.Close();
         }
 
+        private void SaveJson(String iFileNamePrefix, String iJson, Object iObject)
+        {
+            if (_saveJson)
+            {
+                Task.Run(() =>
+                {
+                    var tick = DateTime.Now.Ticks;
+                    if (!File.Exists(iFileNamePrefix + tick + ".json"))
+                    {
+                        var json = iJson;
+                        if (string.IsNullOrEmpty(json))
+                        {
+                            json = JsonConvert.SerializeObject(iObject);
+                        }
+
+                        try
+                        {
+                            File.WriteAllText(iFileNamePrefix + tick + ".json", json);
+                        }
+                        catch (Exception e)
+                        {
+                        }
+                        
+                    }
+                });
+            }
+        }
+
         #endregion
 
         #region Events
@@ -197,27 +227,28 @@ namespace WpfClient
             #endregion
 
             #region Handle Skeleton
-            using (var bodyFrame = reference.BodyFrameReference.AcquireFrame())
+
+            if (SelectedTabItem == TabItem.Skeleton)
             {
-                if (bodyFrame != null)
+                using (var bodyFrame = reference.BodyFrameReference.AcquireFrame())
                 {
-                    var bodies = new Body[bodyFrame.BodyFrameSource.BodyCount];
-                    bodyFrame.GetAndRefreshBodyData(bodies);
-
-                    var body = new ClosestPerson().GetPerson(bodies);
-                    if (body != null)
+                    if (bodyFrame != null)
                     {
-                        var bodyWrapper = new BodyWrapper(body);
+                        var bodies = new Body[bodyFrame.BodyFrameSource.BodyCount];
+                        bodyFrame.GetAndRefreshBodyData(bodies);
 
-                        // Test Json Export
-                        //var json = JsonConvert.SerializeObject(bodyWrapper);
-                        //File.WriteAllText("skeleton.json", json);
-                        //var bodyFromJson = JsonConvert.DeserializeObject<BodyWrapper>(json);
+                        var body = new ClosestPerson().GetPerson(bodies);
+                        if (body != null)
+                        {
+                            var bodyWrapper = new BodyWrapper(body);
 
-                        if(_skeletonCanvas != null)
-                            _skeletonCanvas.DrawSkeleton(bodyWrapper);
+                            // Test Json Export
+                            SaveJson("skeleton", null, bodyWrapper);
+                            //var bodyFromJson = JsonConvert.DeserializeObject<BodyWrapper>(json);
 
-                        //SkeletonImageSource = _skeletonDrawingGroup.GenerateImage(bodyWrapper, _sensor.CoordinateMapper, _sensor.DepthFrameSource.FrameDescription);
+                            if (_skeletonCanvas != null)
+                                _skeletonCanvas.DrawSkeleton(bodyWrapper);
+                        }
                     }
                 }
             }
@@ -238,8 +269,7 @@ namespace WpfClient
                             var colorPointCloud = new ColorPointCloud(colorFrame, depthFrame, bodyIndexFrame, _sensor.CoordinateMapper);
 
                             // Test Json Export
-                            //var json = JsonConvert.SerializeObject(colorPointCloud);
-                            //File.WriteAllText("colorPointCloud.json", json);
+                            SaveJson("colorPointCloud", null, colorPointCloud);
                             //var colorPointCloudFromJson = JsonConvert.DeserializeObject<ColorPointCloud>(json);
 
                             PointCloudImageSource = colorPointCloud.GenerateImage();
@@ -256,8 +286,7 @@ namespace WpfClient
                             var highlightedPointCloud = new HighlightedPointCloud(depthFrame, bodyIndexFrame);
 
                             // Test Json Export
-                            //var json = JsonConvert.SerializeObject(highlightedPointCloud);
-                            //File.WriteAllText("highlightedPointCloud.json", json);
+                            SaveJson("highlightedPointCloud", null, highlightedPointCloud);
                             //var highlightedPointCloudFromJson = JsonConvert.DeserializeObject<HighlightedPointCloud>(json);
 
                             PointCloudImageSource = highlightedPointCloud.GenerateImage();
@@ -273,7 +302,7 @@ namespace WpfClient
 
         private void KinectSensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
-            StatusText = _sensor.IsAvailable ? Properties.Resources.RunningStatusText : Properties.Resources.SensorNotAvailableStatusText;
+            StatusText = _sensor.IsAvailable ? Resources.RunningStatusText : Resources.SensorNotAvailableStatusText;
             _webServiceTimer.Enabled = !_sensor.IsAvailable;
         }
 
@@ -306,13 +335,15 @@ namespace WpfClient
                         // Get Skeleton Data
                         json = _webServiceProxy.GetSkeleton();
                         if (string.IsNullOrEmpty(json)) return;
+
+                        // Save Json
+                        SaveJson("skeleton", json, null);
+
                         // Output
                         var bodyFromJson = JsonConvert.DeserializeObject<BodyWrapper>(json);
 
                         if (_skeletonCanvas != null)
                             _skeletonCanvas.DrawSkeleton(bodyFromJson);
-
-                        //SkeletonImageSource = _skeletonDrawingGroup.GenerateImage(bodyFromJson, _sensor.CoordinateMapper, _sensor.DepthFrameSource.FrameDescription);
                         
                     }), DispatcherPriority.Background);
                     
@@ -325,6 +356,10 @@ namespace WpfClient
                             // Get Color PointCloud
                             json = _webServiceProxy.GetColorPointCloud();
                             if (string.IsNullOrEmpty(json)) return;
+
+                            // Save Json
+                            SaveJson("colorPointCloud", json, null);
+
                             // Output
                             var colorPointCloudFromJson = JsonConvert.DeserializeObject<ColorPointCloud>(json);
                         
@@ -339,6 +374,10 @@ namespace WpfClient
                             // Get Highlighted PointCloud
                             json = _webServiceProxy.GetHighlightedPointCloud();
                             if (string.IsNullOrEmpty(json)) return;
+
+                            // Save Json
+                            SaveJson("highlightedPointCloud", json, null);
+
                             // Output
                             var highlightedPointCloudFromJson = JsonConvert.DeserializeObject<HighlightedPointCloud>(json);
                         

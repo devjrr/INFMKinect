@@ -34,5 +34,17 @@ namespace WpfClient.Properties {
                 this["ApiKey"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool SaveJson {
+            get {
+                return ((bool)(this["SaveJson"]));
+            }
+            set {
+                this["SaveJson"] = value;
+            }
+        }
     }
 }
