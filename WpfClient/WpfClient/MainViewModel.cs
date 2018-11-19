@@ -332,6 +332,22 @@ namespace WpfClient
                 case TabItem.Skeleton:
                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
+                        // Get transport data
+                        json = _webServiceProxy.GetTransportData();
+                        if(string.IsNullOrEmpty(json)) return;
+
+                        // Save Json
+                        SaveJson("transport", json, null);
+
+                        // Output
+                        var transport = JsonConvert.DeserializeObject<TransportWrapper>(json);
+                        if(transport.Skeleton == null) return;
+
+                        if (_skeletonCanvas != null)
+                            _skeletonCanvas.DrawSkeleton(transport.Skeleton);
+
+
+                        /*
                         // Get Skeleton Data
                         json = _webServiceProxy.GetSkeleton();
                         if (string.IsNullOrEmpty(json)) return;
@@ -344,6 +360,7 @@ namespace WpfClient
 
                         if (_skeletonCanvas != null)
                             _skeletonCanvas.DrawSkeleton(bodyFromJson);
+                        */
                         
                     }), DispatcherPriority.Background);
                     

@@ -27,35 +27,36 @@ namespace WpfClient.Proxy
         {
             var response = _restClient.Execute(new RestRequest("/skeleton"));
 
-            var json = response.Content;
-            if (string.IsNullOrEmpty(json)) return null;
-
-            var xml = new XmlDocument();
-            xml.LoadXml(json);
-            if (string.IsNullOrEmpty(xml.InnerText)) return null;
-
-            return xml.InnerText;
+            return GetData(response);
         }
 
         public String GetColorPointCloud()
         {
             var response = _restClient.Execute(new RestRequest("/colorpointcloud"));
 
-            var json = response.Content;
-            if (string.IsNullOrEmpty(json)) return null;
-
-            var xml = new XmlDocument();
-            xml.LoadXml(json);
-            if (string.IsNullOrEmpty(xml.InnerText)) return null;
-
-            return xml.InnerText;
+            return GetData(response);
         }
 
         public String GetHighlightedPointCloud()
         {
             var response = _restClient.Execute(new RestRequest("/highlightedpointcloud"));
 
-            var json = response.Content;
+            return GetData(response);
+        }
+
+        public String GetTransportData()
+        {
+            var response = _restClient.Execute(new RestRequest("/transportdata"));
+
+            return GetData(response);
+        }
+        #endregion
+
+        #region Methods
+
+        private String GetData(IRestResponse iResponse)
+        {
+            var json = iResponse.Content;
             if (string.IsNullOrEmpty(json)) return null;
 
             var xml = new XmlDocument();

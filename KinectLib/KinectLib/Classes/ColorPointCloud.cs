@@ -1,6 +1,8 @@
 ﻿using LightBuzz.Vitruvius;
 using Microsoft.Kinect;
 using System;
+using System.Collections.Generic;
+using System.Windows.Media.Animation;
 
 namespace KinectLib.Classes
 {
@@ -14,6 +16,8 @@ namespace KinectLib.Classes
 
         public ColorPointCloud(ColorFrame iColorFrame, DepthFrame iDepthFrame, BodyIndexFrame iBodyIndexFrame, CoordinateMapper iCoordinateMapper)
         {
+            PointDatas = new List<PointData>();
+
             TimeStamp = DateTime.Now;
 
             Width = iDepthFrame.FrameDescription.Width;
@@ -48,12 +52,22 @@ namespace KinectLib.Classes
             {
                 for (var x = 0; x < Width; ++x)
                 {
+                    var pointData = new PointData()
+                    {
+                        X = x,
+                        Y = y,
+                        Person = false
+                    };
+
                     var depthIndex = (y * Width) + x;
 
                     var player = bodyData[depthIndex];
 
                     if (player != 0xff)
                     {
+                        pointData.Person = true;
+                        pointData.Depth = depthData[depthIndex];
+
                         var colorPoint = colorPoints[depthIndex];
 
                         var colorX = (int) Math.Floor(colorPoint.X + 0.5);
@@ -64,12 +78,17 @@ namespace KinectLib.Classes
                             var colorIndex = ((colorY * colorWidth) + colorX) * Constants.BYTES_PER_PIXEL;
                             var displayIndex = depthIndex * Constants.BYTES_PER_PIXEL;
 
-                            displayPixels[displayIndex + 0] = colorData[colorIndex];
-                            displayPixels[displayIndex + 1] = colorData[colorIndex + 1];
-                            displayPixels[displayIndex + 2] = colorData[colorIndex + 2];
-                            displayPixels[displayIndex + 3] = 0xff;
+                            displayPixels[displayIndex + 0] = colorData[colorIndex]; // B
+                            displayPixels[displayIndex + 1] = colorData[colorIndex + 1]; // G
+                            displayPixels[displayIndex + 2] = colorData[colorIndex + 2]; // R
+                            displayPixels[displayIndex + 3] = 0xff; // Alpha
+
+                            var ba = new[] { displayPixels[displayIndex + 3], displayPixels[displayIndex + 2], displayPixels[displayIndex + 1], displayPixels[displayIndex + 0] };
+                            pointData.Color = KinectHelper.KinectHelper.ByteArrayToHex(ba);
                         }
                     }
+
+                    PointDatas.Add(pointData);
                 }
             }
 
@@ -86,5 +105,7 @@ namespace KinectLib.Classes
 
 
         public byte[] DisplayPixels { get; set; }
+
+        public List<PointData> PointDatas { get; set; }
     }
 }
