@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KinectLib.Interfaces;
 using Microsoft.Kinect;
 
 namespace KinectLib.Classes
 {
     [Serializable]
-    public class BodyWrapper
+    public class BodyWrapper : IBodyWrapper
     {
         public BodyWrapper()
         {

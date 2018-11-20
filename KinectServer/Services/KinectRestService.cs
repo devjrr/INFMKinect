@@ -4,7 +4,6 @@ using KinectLib.Interfaces;
 using KinectServer.Interfaces;
 using Microsoft.Kinect;
 using System;
-using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using Newtonsoft.Json;
@@ -13,7 +12,7 @@ namespace KinectServer.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single, IncludeExceptionDetailInFaults = true)]
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
-    public class KinectRestService : IKinectRestService
+    public class KinectRestService : IKinectRestService, IKinectData
     {
         private const string SERVICE_NAME = "KinectService";
 
@@ -22,7 +21,8 @@ namespace KinectServer.Services
         private String _skeletonJson;
         private String _highlightedPointCloudJson;
         private String _colorPointCloudJson;
-        private String _transportJson;
+
+        private bool _readFrame;
 
         #region Properties
         private IControlStrategy _controlStrategy = new ClosestPerson();
@@ -37,6 +37,11 @@ namespace KinectServer.Services
                 _controlStrategy = value;
             }
         }
+
+        public IBodyWrapper CurrentSkeleton { get; set; }
+
+        public ColorPointCloud CurrentColorPointCloud { get; set; }
+
         #endregion
 
         #region Constructor
@@ -77,11 +82,6 @@ namespace KinectServer.Services
             return _colorPointCloudJson;
         }
 
-        public string GetTransportData()
-        {
-            return _transportJson;
-        }
-
         public void Shutdown()
         {
             _reader.Dispose();
@@ -92,11 +92,13 @@ namespace KinectServer.Services
         #region Events
         void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
+            if(_readFrame) return;
+
+            _readFrame = true;
+
             var reference = e.FrameReference.AcquireFrame();
             if (reference == null) return;
-
-            var transport = new TransportWrapper();
-
+            
             #region Handle Skeleton
             using (var bodyFrame = reference.BodyFrameReference.AcquireFrame())
             {
@@ -109,7 +111,8 @@ namespace KinectServer.Services
                     if (body != null)
                     {
                         var bodyWrapper = new BodyWrapper(body);
-                        transport.Skeleton = bodyWrapper;
+                        CurrentSkeleton = bodyWrapper;
+                        
 
                         // Json Export
                         _skeletonJson = JsonConvert.SerializeObject(bodyWrapper);
@@ -128,7 +131,7 @@ namespace KinectServer.Services
                 if (colorFrame != null && depthFrame != null && bodyIndexFrame != null)
                 {
                     var colorPointCloud = new ColorPointCloud(colorFrame, depthFrame, bodyIndexFrame, _sensor.CoordinateMapper);
-                    transport.PointDatas = new List<PointData>(colorPointCloud.PointDatas);
+                    CurrentColorPointCloud = colorPointCloud;
 
                     // Json Export
                     _colorPointCloudJson = JsonConvert.SerializeObject(colorPointCloud);
@@ -151,7 +154,29 @@ namespace KinectServer.Services
 
             #endregion
 
-            _transportJson = JsonConvert.SerializeObject(transport);
+            _readFrame = false;
+        }
+        #endregion
+
+        #region IKinectData
+        public bool[] GetBodyData()
+        {
+            return CurrentColorPointCloud.BodyData;
+        }
+
+        public byte[] GetColorData()
+        {
+            return CurrentColorPointCloud.ColorData;
+        }
+
+        public ushort[] GetDepthData()
+        {
+            return CurrentColorPointCloud.DepthData;
+        }
+
+        IBodyWrapper IKinectData.GetSkeleton()
+        {
+            return CurrentSkeleton;
         }
         #endregion
 

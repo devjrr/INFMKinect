@@ -19,9 +19,5 @@ namespace KinectServer.Interfaces
         [WebGet(UriTemplate = Routing.Routing.GetKinectData + "/highlightedpointcloud", BodyStyle = WebMessageBodyStyle.Bare)]
         String GetHighlightedPointCloud();
 
-        [OperationContract]
-        [WebGet(UriTemplate = Routing.Routing.GetKinectData + "/transportdata", BodyStyle = WebMessageBodyStyle.Bare)]
-        String GetTransportData();
-
     }
 }

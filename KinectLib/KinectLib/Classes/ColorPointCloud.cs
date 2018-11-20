@@ -16,8 +16,6 @@ namespace KinectLib.Classes
 
         public ColorPointCloud(ColorFrame iColorFrame, DepthFrame iDepthFrame, BodyIndexFrame iBodyIndexFrame, CoordinateMapper iCoordinateMapper)
         {
-            PointDatas = new List<PointData>();
-
             TimeStamp = DateTime.Now;
 
             Width = iDepthFrame.FrameDescription.Width;
@@ -48,16 +46,13 @@ namespace KinectLib.Classes
             var displayPixels = new byte[Width * Height * Constants.BYTES_PER_PIXEL];
             Array.Clear(displayPixels, 0, displayPixels.Length);
 
+            var bodyDataBool = new bool[Width * Height];
+            var colorDataWithoutAlpha = new byte[Width * Height * 3];
+
             for (var y = 0; y < Height; ++y)
             {
                 for (var x = 0; x < Width; ++x)
                 {
-                    var pointData = new PointData()
-                    {
-                        X = x,
-                        Y = y,
-                        Person = false
-                    };
 
                     var depthIndex = (y * Width) + x;
 
@@ -65,8 +60,7 @@ namespace KinectLib.Classes
 
                     if (player != 0xff)
                     {
-                        pointData.Person = true;
-                        pointData.Depth = depthData[depthIndex];
+                        bodyDataBool[depthIndex] = true;
 
                         var colorPoint = colorPoints[depthIndex];
 
@@ -83,16 +77,22 @@ namespace KinectLib.Classes
                             displayPixels[displayIndex + 2] = colorData[colorIndex + 2]; // R
                             displayPixels[displayIndex + 3] = 0xff; // Alpha
 
-                            var ba = new[] { displayPixels[displayIndex + 3], displayPixels[displayIndex + 2], displayPixels[displayIndex + 1], displayPixels[displayIndex + 0] };
-                            pointData.Color = KinectHelper.KinectHelper.ByteArrayToHex(ba);
+                            var colorDataIndex = depthIndex * 3;
+                            colorDataWithoutAlpha[colorDataIndex + 0] = colorData[colorIndex + 0];
+                            colorDataWithoutAlpha[colorDataIndex + 1] = colorData[colorIndex + 1];
+                            colorDataWithoutAlpha[colorDataIndex + 2] = colorData[colorIndex + 2];
+
                         }
                     }
-
-                    PointDatas.Add(pointData);
+                    
                 }
             }
 
             DisplayPixels = displayPixels;
+
+            BodyData = bodyDataBool;
+            DepthData = depthData;
+            ColorData = colorDataWithoutAlpha;
         }
 
         public DateTime TimeStamp { get; set; }
@@ -101,11 +101,12 @@ namespace KinectLib.Classes
 
         public int Height { get; set; }
 
-        //public ushort[] DepthData { get; set; }
-
-
         public byte[] DisplayPixels { get; set; }
 
-        public List<PointData> PointDatas { get; set; }
+        public ushort[] DepthData { get; set; }
+
+        public byte[] ColorData { get; set; }
+
+        public bool[] BodyData { get; set; }
     }
 }

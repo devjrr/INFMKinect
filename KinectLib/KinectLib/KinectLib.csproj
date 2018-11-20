@@ -53,7 +53,9 @@
     <Compile Include="Classes\TransportWrapper.cs" />
     <Compile Include="ControlStrategy\ClosestPerson.cs" />
     <Compile Include="ControlStrategy\FirstPerson.cs" />
+    <Compile Include="Interfaces\IBodyWrapper.cs" />
     <Compile Include="Interfaces\IControlStrategy.cs" />
+    <Compile Include="Interfaces\IKinectData.cs" />
     <Compile Include="KinectHelper\KinectHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

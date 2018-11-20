@@ -26,6 +26,7 @@ namespace WpfClient
         private readonly KinectSensor _sensor = KinectSensor.GetDefault();
         private readonly MultiSourceFrameReader _reader;
         private readonly bool _saveJson;
+        private bool _readFrame;
 
         // Webservice Timer
         private readonly Timer _webServiceTimer;
@@ -39,12 +40,15 @@ namespace WpfClient
         {
             _saveJson = Settings.Default.SaveJson;
 
+            
             _reader = _sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Infrared | FrameSourceTypes.Body | FrameSourceTypes.BodyIndex);
             _reader.MultiSourceFrameArrived += Reader_MultiSourceFrameArrived;
 
             _sensor.IsAvailableChanged += KinectSensor_IsAvailableChanged;
 
             _sensor.Open();
+            
+            
 
             StatusText = _sensor.IsAvailable ? Resources.RunningStatusText : Resources.NoSensorStatusText;
 
@@ -191,6 +195,10 @@ namespace WpfClient
         #region Events
         private void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
+            if(_readFrame) return;
+
+            _readFrame = true;
+
             var reference = e.FrameReference.AcquireFrame();
 
             #region Handle Stream
@@ -298,6 +306,8 @@ namespace WpfClient
 
             #endregion
 
+            _readFrame = false;
+
         }
 
         private void KinectSensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
@@ -332,22 +342,7 @@ namespace WpfClient
                 case TabItem.Skeleton:
                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        // Get transport data
-                        json = _webServiceProxy.GetTransportData();
-                        if(string.IsNullOrEmpty(json)) return;
-
-                        // Save Json
-                        SaveJson("transport", json, null);
-
-                        // Output
-                        var transport = JsonConvert.DeserializeObject<TransportWrapper>(json);
-                        if(transport.Skeleton == null) return;
-
-                        if (_skeletonCanvas != null)
-                            _skeletonCanvas.DrawSkeleton(transport.Skeleton);
-
-
-                        /*
+                        
                         // Get Skeleton Data
                         json = _webServiceProxy.GetSkeleton();
                         if (string.IsNullOrEmpty(json)) return;
@@ -360,7 +355,7 @@ namespace WpfClient
 
                         if (_skeletonCanvas != null)
                             _skeletonCanvas.DrawSkeleton(bodyFromJson);
-                        */
+                        
                         
                     }), DispatcherPriority.Background);
                     

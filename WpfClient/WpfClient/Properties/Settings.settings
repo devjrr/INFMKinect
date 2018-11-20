@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="ApiKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://localhost:56789/KinectService/</Value>
+      <Value Profile="(Default)">http://192.168.0.185:56789/KinectService/</Value>
     </Setting>
     <Setting Name="SaveJson" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
