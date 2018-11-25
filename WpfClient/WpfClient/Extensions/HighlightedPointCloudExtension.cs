@@ -1,5 +1,4 @@
 ﻿using KinectLib.Classes;
-using LightBuzz.Vitruvius;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;

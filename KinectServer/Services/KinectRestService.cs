@@ -134,7 +134,7 @@ namespace KinectServer.Services
                     CurrentColorPointCloud = colorPointCloud;
 
                     // Json Export
-                    _colorPointCloudJson = JsonConvert.SerializeObject(colorPointCloud);
+                   // _colorPointCloudJson = JsonConvert.SerializeObject(colorPointCloud);
                 }
 
             }
@@ -148,7 +148,7 @@ namespace KinectServer.Services
                     var highlightedPointCloud = new HighlightedPointCloud(depthFrame, bodyIndexFrame);
                     
                     // Json Export
-                    _highlightedPointCloudJson = JsonConvert.SerializeObject(highlightedPointCloud);
+                    //_highlightedPointCloudJson = JsonConvert.SerializeObject(highlightedPointCloud);
                 }
             }
 
