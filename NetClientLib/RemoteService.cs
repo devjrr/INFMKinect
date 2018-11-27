@@ -15,7 +15,8 @@ namespace NetClientLib
         private LoadCounter download = new LoadCounter();
         private LoadCounter upload = new LoadCounter();
 
-
+        private const int width = 256;
+        private const int height = 212;
 
         public RemoteService()
         {
@@ -35,8 +36,8 @@ namespace NetClientLib
             byte[] vs = LZ4Codec.Unwrap(Convert.FromBase64String(inner));
 
 
-            IList<CloudPoint> points = new List<CloudPoint>(512 * 424);
-            for (int i = 0; i < 512 * 424; i++)
+            IList<CloudPoint> points = new List<CloudPoint>(height * width);
+            for (int i = 0; i < width * height; i++)
             {
                 if (vs[i] != 0x00)
                 {
@@ -49,9 +50,9 @@ namespace NetClientLib
                     float b = (color << 6) & mask;
 
 
-                    float x = i % 512;
-                    float y = i / 512;
-                    float z = bytesToShort(vs[i * 2 + (512 * 424)], vs[i * 2 + (512 * 424) + 1]);
+                    float x = i % width;
+                    float y = i / width;
+                    float z = bytesToShort(vs[i * 2 + (width * height)], vs[i * 2 + (width * height) + 1]);
 
                     points.Add(new CloudPoint(r, g, b, x, y, z));
 
