@@ -30,5 +30,16 @@ namespace KinectLib.Interfaces
          */
         IBodyWrapper GetSkeleton();
 
+        /// <summary>
+        /// Shuts the KinectService down. Must be called on the end of the program.
+        /// </summary>
+        void Shutdown();
+
+        /// <summary>
+        /// Checks if a kinect is connected.
+        /// </summary>
+        /// <returns>true if a kinect is connected</returns>
+        bool IsKinectConnected();
+
     }
 }

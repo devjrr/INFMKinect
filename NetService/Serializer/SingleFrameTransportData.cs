@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace NetService.Serializer
 {
@@ -63,6 +64,12 @@ namespace NetService.Serializer
             }
 
             return LZ4Codec.Wrap(result);
+        }
+
+        public string getSkeletonData()
+        {
+            var skeleton = kinectData.GetSkeleton();
+            return JsonConvert.SerializeObject(skeleton);
         }
 
         private byte R8G8B8toR3G3B3(byte r, byte g, byte b)

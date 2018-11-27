@@ -50,6 +50,7 @@
     <Compile Include="Classes\BodyWrapper.cs" />
     <Compile Include="Classes\ColorPointCloud.cs" />
     <Compile Include="Classes\HighlightedPointCloud.cs" />
+    <Compile Include="Classes\KinectData.cs" />
     <Compile Include="Classes\PointData.cs" />
     <Compile Include="Classes\TransportWrapper.cs" />
     <Compile Include="ControlStrategy\ClosestPerson.cs" />

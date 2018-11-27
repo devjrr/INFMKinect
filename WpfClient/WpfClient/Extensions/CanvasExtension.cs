@@ -1,8 +1,11 @@
-﻿using KinectLib.Classes;
+﻿using System.Collections.Generic;
+using KinectLib.Classes;
 using Microsoft.Kinect;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using KinectLib.Interfaces;
+using NetClientLib;
 
 namespace WpfClient.Extensions
 {
@@ -47,8 +50,13 @@ namespace WpfClient.Extensions
             return value;
         }
 
+        public static void DrawPointCloud(this Canvas cancas, IList<CloudPoint> iCloudPoint)
+        {
 
-        public static void DrawSkeleton(this Canvas canvas, BodyWrapper body)
+        }
+
+
+        public static void DrawSkeleton(this Canvas canvas, IBodyWrapper body)
         {
             canvas.Children.Clear();
             if (body == null) return;

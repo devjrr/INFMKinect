@@ -1,8 +1,6 @@
 ﻿using Base.ViewModel;
 using KinectLib.Classes;
-using KinectLib.ControlStrategy;
-using LightBuzz.Vitruvius;
-using Microsoft.Kinect;
+using KinectLib.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -23,16 +21,17 @@ namespace WpfClient
     public class MainViewModel : BaseViewModel
     {
         #region Fields
-        private readonly KinectSensor _sensor = KinectSensor.GetDefault();
-        private readonly MultiSourceFrameReader _reader;
         private readonly bool _saveJson;
-        private bool _readFrame;
+
+        private readonly IKinectData _kinectData;
+        private bool _dataFromWebService;
 
         // Webservice Timer
-        private readonly Timer _webServiceTimer;
         private readonly WebServiceProxy _webServiceProxy;
 
         private Canvas _skeletonCanvas;
+        private Canvas _pointCloudCanvas;
+        private Canvas _depthPointCloudCanvas;
         #endregion
 
         #region Constructor
@@ -40,24 +39,15 @@ namespace WpfClient
         {
             _saveJson = Settings.Default.SaveJson;
 
-            
-            _reader = _sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Infrared | FrameSourceTypes.Body | FrameSourceTypes.BodyIndex);
-            _reader.MultiSourceFrameArrived += Reader_MultiSourceFrameArrived;
+            _kinectData = new KinectData();
 
-            _sensor.IsAvailableChanged += KinectSensor_IsAvailableChanged;
-
-            _sensor.Open();
-            
-            
-
-            StatusText = _sensor.IsAvailable ? Resources.RunningStatusText : Resources.NoSensorStatusText;
+            CheckKinectConnected();
 
             // Webservice Timer
-            _webServiceTimer = new Timer(60);
+            var webServiceTimer = new Timer(60);
             _webServiceProxy = new WebServiceProxy();
-            _webServiceTimer.Elapsed += WebServiceTimer_Elapsed;
-
-            _webServiceTimer.Enabled = !_sensor.IsAvailable;
+            webServiceTimer.Elapsed += WebServiceTimer_Elapsed;
+            webServiceTimer.Enabled = true;
         }
         #endregion
 
@@ -72,18 +62,6 @@ namespace WpfClient
                 if (Equals(_statusText, value)) return;
                 _statusText = value;
                 OnPropertyChanged("StatusText");
-            }
-        }
-
-        private ImageSource _streamImageSource;
-        public ImageSource StreamImageSource
-        {
-            get => _streamImageSource;
-            set
-            {
-                if (Equals(_streamImageSource, value)) return;
-                _streamImageSource = value;
-                OnPropertyChanged("StreamImageSource");
             }
         }
 
@@ -111,18 +89,6 @@ namespace WpfClient
             }
         }
 
-        private Visualization _streamVisualization = Visualization.Color;
-        public Visualization StreamVisualization
-        {
-            get => _streamVisualization;
-            set
-            {
-                if (_streamVisualization == value) return;
-                _streamVisualization = value;
-                OnPropertyChanged("StreamVisualization");
-            }
-        }
-
         private PointCloudVisualization _pointCloudVisualization;
         public PointCloudVisualization PointCloudVisualization
         {
@@ -135,7 +101,7 @@ namespace WpfClient
             }
         }
 
-        private TabItem _selectedTabItem = TabItem.Stream;
+        private TabItem _selectedTabItem = TabItem.Skeleton;
         public TabItem SelectedTabItem
         {
             get => _selectedTabItem;
@@ -150,16 +116,22 @@ namespace WpfClient
 
         #region Methods
 
-        public void Init(Canvas iCanvas)
+        public void Init(Canvas iCanvas, Canvas iCanvas2, Canvas iCanvas3)
         {
             _skeletonCanvas = iCanvas;
+            _pointCloudCanvas = iCanvas2;
+            _depthPointCloudCanvas = iCanvas3;
+        }
+
+        private void CheckKinectConnected()
+        {
+            StatusText = _kinectData.IsKinectConnected() ? Resources.RunningStatusText : Resources.SensorNotAvailableStatusText;
+            _dataFromWebService = !_kinectData.IsKinectConnected();
         }
 
         public void Close()
         {
-            _reader?.Dispose();
-
-            _sensor?.Close();
+            _kinectData.Shutdown();
         }
 
         private void SaveJson(String iFileNamePrefix, String iJson, Object iObject)
@@ -181,10 +153,10 @@ namespace WpfClient
                         {
                             File.WriteAllText(iFileNamePrefix + tick + ".json", json);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
+                            // ignored
                         }
-                        
                     }
                 });
             }
@@ -193,170 +165,39 @@ namespace WpfClient
         #endregion
 
         #region Events
-        private void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
-        {
-            if(_readFrame) return;
-
-            _readFrame = true;
-
-            var reference = e.FrameReference.AcquireFrame();
-
-            #region Handle Stream
-            using (var frame = reference.ColorFrameReference.AcquireFrame())
-            {
-                if (frame != null)
-                {
-                    if (StreamVisualization == Visualization.Color)
-                    {
-                        StreamImageSource = frame.ToBitmap();
-                    }
-                }
-            }
-            using (var frame = reference.DepthFrameReference.AcquireFrame())
-            {
-                if (frame != null)
-                {
-                    if (StreamVisualization == Visualization.Depth)
-                    {
-                        StreamImageSource = frame.ToBitmap();
-                    }
-                }
-            }
-            using (var frame = reference.InfraredFrameReference.AcquireFrame())
-            {
-                if (frame != null)
-                {
-                    if (StreamVisualization == Visualization.Infrared)
-                    {
-                        StreamImageSource = frame.ToBitmap();
-                    }
-                }
-            }
-            #endregion
-
-            #region Handle Skeleton
-
-            if (SelectedTabItem == TabItem.Skeleton)
-            {
-                using (var bodyFrame = reference.BodyFrameReference.AcquireFrame())
-                {
-                    if (bodyFrame != null)
-                    {
-                        var bodies = new Body[bodyFrame.BodyFrameSource.BodyCount];
-                        bodyFrame.GetAndRefreshBodyData(bodies);
-
-                        var body = new ClosestPerson().GetPerson(bodies);
-                        if (body != null)
-                        {
-                            var bodyWrapper = new BodyWrapper(body);
-
-                            // Test Json Export
-                            SaveJson("skeleton", null, bodyWrapper);
-                            //var bodyFromJson = JsonConvert.DeserializeObject<BodyWrapper>(json);
-
-                            if (_skeletonCanvas != null)
-                                _skeletonCanvas.DrawSkeleton(bodyWrapper);
-                        }
-                    }
-                }
-            }
-            #endregion
-
-            #region Handle Point Cloud
-
-            if (SelectedTabItem == TabItem.PointCloud)
-            {
-                if (PointCloudVisualization == PointCloudVisualization.Color)
-                {
-                    using (var colorFrame = reference.ColorFrameReference.AcquireFrame())
-                    using (var depthFrame = reference.DepthFrameReference.AcquireFrame())
-                    using (var bodyIndexFrame = reference.BodyIndexFrameReference.AcquireFrame())
-                    {
-                        if (colorFrame != null && depthFrame != null && bodyIndexFrame != null)
-                        {
-                            var colorPointCloud = new ColorPointCloud(colorFrame, depthFrame, bodyIndexFrame, _sensor.CoordinateMapper);
-
-                            // Test Json Export
-                            SaveJson("colorPointCloud", null, colorPointCloud);
-                            //var colorPointCloudFromJson = JsonConvert.DeserializeObject<ColorPointCloud>(json);
-
-                            PointCloudImageSource = colorPointCloud.GenerateImage();
-                        }
-                    }
-                }
-                else
-                {
-                    using (var depthFrame = reference.DepthFrameReference.AcquireFrame())
-                    using (var bodyIndexFrame = reference.BodyIndexFrameReference.AcquireFrame())
-                    {
-                        if (depthFrame != null && bodyIndexFrame != null)
-                        {
-                            var highlightedPointCloud = new HighlightedPointCloud(depthFrame, bodyIndexFrame);
-
-                            // Test Json Export
-                            SaveJson("highlightedPointCloud", null, highlightedPointCloud);
-                            //var highlightedPointCloudFromJson = JsonConvert.DeserializeObject<HighlightedPointCloud>(json);
-
-                            PointCloudImageSource = highlightedPointCloud.GenerateImage();
-                        }
-                    }
-                }
-            }
-
-
-            #endregion
-
-            _readFrame = false;
-
-        }
-
-        private void KinectSensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
-        {
-            StatusText = _sensor.IsAvailable ? Resources.RunningStatusText : Resources.SensorNotAvailableStatusText;
-            _webServiceTimer.Enabled = !_sensor.IsAvailable;
-        }
-
         private void WebServiceTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            string json;
+            // Check Kinect Status
+            CheckKinectConnected();
+
+            string json = null;
+            IBodyWrapper body = null;
 
             switch (SelectedTabItem)
             {
-                case TabItem.Stream:
-                    if (StreamVisualization == Visualization.Color)
-                    {
-                        // Get Color Stream
-                        // Output
-                    }
-                    else if (StreamVisualization == Visualization.Depth)
-                    {
-                        // Get Depth Stream
-                        // Output
-                    }
-                    else if (StreamVisualization == Visualization.Infrared)
-                    {
-                        // Get Infrared Stream
-                        // Output
-                    }
-                    break;
                 case TabItem.Skeleton:
                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
+
+                        if (_dataFromWebService)
+                        {
+                            // Get Skeleton Data
+                            json = _webServiceProxy.GetSkeleton();
+                            if (string.IsNullOrEmpty(json)) return;
+                            body = JsonConvert.DeserializeObject<BodyWrapper>(json);
+                        }
+                        else
+                        {
+                            body = _kinectData.GetSkeleton();
+                        }
                         
-                        // Get Skeleton Data
-                        json = _webServiceProxy.GetSkeleton();
-                        if (string.IsNullOrEmpty(json)) return;
 
                         // Save Json
-                        SaveJson("skeleton", json, null);
+                        SaveJson("skeleton", null, body);
 
-                        // Output
-                        var bodyFromJson = JsonConvert.DeserializeObject<BodyWrapper>(json);
+                        _skeletonCanvas?.DrawSkeleton(body);
 
-                        if (_skeletonCanvas != null)
-                            _skeletonCanvas.DrawSkeleton(bodyFromJson);
-                        
-                        
+
                     }), DispatcherPriority.Background);
                     
                     break;
@@ -366,34 +207,48 @@ namespace WpfClient
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             // Get Color PointCloud
-                            json = _webServiceProxy.GetColorPointCloud();
-                            if (string.IsNullOrEmpty(json)) return;
+                            var pointCloud = _webServiceProxy.GetColorPointCloud();
+                            if (pointCloud == null) return;
 
-                            // Save Json
-                            SaveJson("colorPointCloud", json, null);
+                            _pointCloudCanvas.DrawPointCloud(pointCloud);
+
+                            /*
+                            //var bmp = new DirectBitmap(256, 212);
+                            var bmp = new WriteableBitmap(256, 212, Constants.DPI, Constants.DPI, PixelFormats.Bgr24, null);
+
+
+
+                            foreach (var p in pointCloud)
+                            {
+                                // Color
+                                bmp.SetPixel((int)p.GetX(), (int)p.GetY(), Color.FromArgb((int)p.GetR(), (int)p.GetG(), (int)p.GetB()));
+                            }
+                            
 
                             // Output
                             var colorPointCloudFromJson = JsonConvert.DeserializeObject<ColorPointCloud>(json);
                         
                             PointCloudImageSource = colorPointCloudFromJson.GenerateImage();
+                            */
                         }), DispatcherPriority.Background);
                         
                     }
-                    else if (PointCloudVisualization == PointCloudVisualization.Highlighted)
+                    else if (PointCloudVisualization == PointCloudVisualization.Depth)
                     {
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             // Get Highlighted PointCloud
-                            json = _webServiceProxy.GetHighlightedPointCloud();
-                            if (string.IsNullOrEmpty(json)) return;
+                            var pointCloud = _webServiceProxy.GetDepthPointCloud();
+                            if (pointCloud == null) return;
 
-                            // Save Json
-                            SaveJson("highlightedPointCloud", json, null);
+                            _depthPointCloudCanvas.DrawPointCloud(pointCloud);
 
+                            /*
                             // Output
                             var highlightedPointCloudFromJson = JsonConvert.DeserializeObject<HighlightedPointCloud>(json);
                         
                             PointCloudImageSource = highlightedPointCloudFromJson.GenerateImage();
+                            */
                         }), DispatcherPriority.Background);
                         
                     }

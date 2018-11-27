@@ -47,6 +47,11 @@ namespace NetService.RestService
             return base64;
         }
 
+        public string SkeletonData()
+        {
+            return source.getSkeletonData();
+        }
+
         protected static void WriteProgress(string s, int x)
         {
             // from https://stackoverflow.com/a/49099413

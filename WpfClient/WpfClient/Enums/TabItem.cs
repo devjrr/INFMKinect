@@ -3,7 +3,6 @@
     public enum TabItem
     {
         Skeleton,
-        Stream,
         PointCloud
     }
 }

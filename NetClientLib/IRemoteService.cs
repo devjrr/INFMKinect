@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 
@@ -8,6 +9,8 @@ namespace NetClientLib
     public interface IRemoteService
     {
         IList<CloudPoint> GetCloudpoints();
+
+        string GetSkeletonData();
 
         bool isServerOnline();
 

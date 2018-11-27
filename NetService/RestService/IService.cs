@@ -17,6 +17,10 @@ namespace NetService.RestService
 
         [OperationContract]
         [WebGet]
+        string SkeletonData();
+
+        [OperationContract]
+        [WebGet]
         string Status();
     }
 }

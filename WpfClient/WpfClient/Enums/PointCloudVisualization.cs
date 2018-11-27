@@ -3,6 +3,6 @@
     public enum PointCloudVisualization
     {
         Color,
-        Highlighted
+        Depth
     }
 }

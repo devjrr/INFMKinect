@@ -9,5 +9,7 @@ namespace NetService
     interface ISerializer
     {
         byte[] getData();
+
+        string getSkeletonData();
     }
 }

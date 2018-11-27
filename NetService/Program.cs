@@ -1,11 +1,11 @@
 ﻿using KinectLib.Interfaces;
-using KinectServer.Services;
 using NetService.Serializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KinectLib.Classes;
 
 namespace NetService
 {
@@ -13,7 +13,7 @@ namespace NetService
     {
         static void Main(string[] args)
         {
-            IKinectData source = new KinectRestService();
+            IKinectData source = new KinectData();
             ISerializer serializer = new SingleFrameTransportData(source);
             INetService service = new RestService.RestService(serializer);
             service.run();

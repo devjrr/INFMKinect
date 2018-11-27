@@ -62,6 +62,11 @@ namespace NetClientLib
             return points;
         }
 
+        public String GetSkeletonData()
+        {
+            return HtmlGet("SkeletonData");
+        }
+
         private static ushort bytesToShort(byte a, byte b)
         {
             return (ushort)(a + (b << 8));

@@ -1,62 +1,36 @@
-﻿using KinectLib.Classes;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using KinectLib.ControlStrategy;
 using KinectLib.Interfaces;
-using KinectServer.Interfaces;
 using Microsoft.Kinect;
-using System;
-using System.ServiceModel;
-using System.ServiceModel.Activation;
-using Newtonsoft.Json;
 
-namespace KinectServer.Services
+namespace KinectLib.Classes
 {
-    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single, IncludeExceptionDetailInFaults = true)]
-    [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
-    public class KinectRestService : IKinectRestService, IKinectData
+    public class KinectData : IKinectData
     {
-        private const string SERVICE_NAME = "KinectService";
-
+        #region Fields
         private readonly KinectSensor _sensor = KinectSensor.GetDefault();
         private MultiSourceFrameReader _reader;
-        private String _skeletonJson;
-        private String _highlightedPointCloudJson;
-        private String _colorPointCloudJson;
-
         private bool _readFrame;
+        #endregion
 
         #region Properties
-        private IControlStrategy _controlStrategy = new ClosestPerson();
-        public IControlStrategy ControlStrategy
-        {
-            get => _controlStrategy;
-            set
-            {
-                if (_controlStrategy == value) return;
-                if (value == null) return;
-
-                _controlStrategy = value;
-            }
-        }
-
         public IBodyWrapper CurrentSkeleton { get; set; }
 
         public ColorPointCloud CurrentColorPointCloud { get; set; }
-
         #endregion
 
         #region Constructor
-        public KinectRestService()
+        public KinectData()
         {
             InitReader();
         }
         #endregion
 
         #region Methods
-        public string GetServiceName()
-        {
-            return SERVICE_NAME;
-        }
-
         private void InitReader()
         {
             if (_sensor == null) return;
@@ -67,38 +41,18 @@ namespace KinectServer.Services
 
         }
 
-        public string GetSkeleton()
-        {
-            return _skeletonJson;
-        }
-
-        public string GetHighlightedPointCloud()
-        {
-            return _highlightedPointCloudJson;
-        }
-
-        public string GetColorPointCloud()
-        {
-            return _colorPointCloudJson;
-        }
-
-        public void Shutdown()
-        {
-            _reader.Dispose();
-            _sensor.Close();
-        }
         #endregion
 
         #region Events
         void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
-            if(_readFrame) return;
+            if (_readFrame) return;
 
             _readFrame = true;
 
             var reference = e.FrameReference.AcquireFrame();
             if (reference == null) return;
-            
+
             #region Handle Skeleton
             using (var bodyFrame = reference.BodyFrameReference.AcquireFrame())
             {
@@ -112,10 +66,6 @@ namespace KinectServer.Services
                     {
                         var bodyWrapper = new BodyWrapper(body);
                         CurrentSkeleton = bodyWrapper;
-                        
-
-                        // Json Export
-                        _skeletonJson = JsonConvert.SerializeObject(bodyWrapper);
                     }
                 }
             }
@@ -132,24 +82,8 @@ namespace KinectServer.Services
                 {
                     var colorPointCloud = new ColorPointCloud(colorFrame, depthFrame, bodyIndexFrame, _sensor.CoordinateMapper);
                     CurrentColorPointCloud = colorPointCloud;
-
-                    // Json Export
-                   // _colorPointCloudJson = JsonConvert.SerializeObject(colorPointCloud);
                 }
 
-            }
-
-
-            using (var depthFrame = reference.DepthFrameReference.AcquireFrame())
-            using (var bodyIndexFrame = reference.BodyIndexFrameReference.AcquireFrame())
-            {
-                if (depthFrame != null && bodyIndexFrame != null)
-                {
-                    var highlightedPointCloud = new HighlightedPointCloud(depthFrame, bodyIndexFrame);
-                    
-                    // Json Export
-                    //_highlightedPointCloudJson = JsonConvert.SerializeObject(highlightedPointCloud);
-                }
             }
 
             #endregion
@@ -157,6 +91,7 @@ namespace KinectServer.Services
             _readFrame = false;
         }
         #endregion
+
 
         #region IKinectData
         public bool[] GetBodyData()
@@ -178,7 +113,17 @@ namespace KinectServer.Services
         {
             return CurrentSkeleton;
         }
-        #endregion
 
+        public void Shutdown()
+        {
+            _reader.Dispose();
+            _sensor.Close();
+        }
+
+        public bool IsKinectConnected()
+        {
+            return _sensor.IsAvailable;
+        }
+        #endregion
     }
 }

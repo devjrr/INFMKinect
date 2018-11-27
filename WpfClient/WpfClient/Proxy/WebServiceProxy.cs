@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
+using NetClientLib;
 using RestSharp;
 
 namespace WpfClient.Proxy
@@ -12,7 +9,7 @@ namespace WpfClient.Proxy
     public class WebServiceProxy
     {
         #region Fields
-        private RestClient _restClient;
+        private IRemoteService _restClient;
         #endregion
 
 
@@ -20,35 +17,27 @@ namespace WpfClient.Proxy
 
         public WebServiceProxy()
         {
-            _restClient = new RestClient(Properties.Settings.Default.ApiKey + "GetKinectData");
+            _restClient = RemoteServiceBuilder.GetRemoteService();
         }
 
         public String GetSkeleton()
         {
-            var response = _restClient.Execute(new RestRequest("/skeleton"));
-
-            return GetData(response);
+            var response = _restClient.GetSkeletonData();
+            return response;
         }
 
-        public String GetColorPointCloud()
+        public IList<CloudPoint> GetColorPointCloud()
         {
-            var response = _restClient.Execute(new RestRequest("/colorpointcloud"));
+            var response = _restClient.GetCloudpoints();
 
-            return GetData(response);
+            return response;
         }
 
-        public String GetHighlightedPointCloud()
+        public IList<CloudPoint> GetDepthPointCloud()
         {
-            var response = _restClient.Execute(new RestRequest("/highlightedpointcloud"));
+            var response = _restClient.GetCloudpoints();
 
-            return GetData(response);
-        }
-
-        public String GetTransportData()
-        {
-            var response = _restClient.Execute(new RestRequest("/transportdata"));
-
-            return GetData(response);
+            return response;
         }
         #endregion
 
