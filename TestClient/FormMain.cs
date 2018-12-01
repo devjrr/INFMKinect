@@ -25,7 +25,7 @@ namespace TestClient
             InitializeComponent();
             Text = "offline";
 
-            timer.Interval = 1000 / 60;
+            timer.Interval = 1000 / 120;
             timer.Elapsed += OnTimerTick;
             timer.Start();
         }

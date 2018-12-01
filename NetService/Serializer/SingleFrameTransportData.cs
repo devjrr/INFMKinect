@@ -16,8 +16,8 @@ namespace NetService.Serializer
 
         System.Timers.Timer timer = new System.Timers.Timer();
 
-        private const int width = 512 / 2;
-        private const int height = 424 / 2;
+        private const int widthOutput = 512 / 2;
+        private const int heightOutput = 424 / 2;
 
         private const int widthInput = 512;
         private const int heightInput = 424;
@@ -33,37 +33,35 @@ namespace NetService.Serializer
 
         public byte[] getData()
         {
-
-            byte[] result = new byte[width * height * 1 + width * height * 2];
+            byte[] result = new byte[widthOutput * heightOutput * 1 + widthOutput * heightOutput * 2];
 
             byte[] color = kinectData.GetColorData();
             ushort[] depth = kinectData.GetDepthData();
-            // Buffer.BlockCopy(kinectData.GetDepthData(), 0, result, width * height, width * height * 2); 
 
-
-
-            for (int y = 0, yz = 0; y < heightInput; y += 2, yz++)
+            for (int yInput = 0, yOutput = 0; yInput < heightInput; yInput += 2, yOutput++)
             {
-                for (int x = 0, xz = 0; x < widthInput; x += 2, xz++)
+                for (int xInput = 0, xOutput = 0; xInput < widthInput; xInput += 2, xOutput++)
                 {
-                    var i = getIfromXY(x, y, widthInput);
-                    byte colorByte = R8G8B8toR3G3B3(
-                        (color[i * 3 + 2]),
-                        (color[i * 3 + 1]),
-                        (color[i * 3 + 0])
+                    int iInput = getIfromXY(xInput, yInput, widthInput);
+
+                    byte colorByte = R8G8B8toR3G3B2(
+                        color[iInput * 3 + 2],
+                        color[iInput * 3 + 1],
+                        color[iInput * 3 + 0]
                     );
 
-                    var iz = getIfromXY(xz, yz, width);
-                    result[iz] = colorByte;
+                    int iOutput = getIfromXY(xOutput, yOutput, widthOutput);
+                    result[iOutput] = colorByte;
 
-
-
-                    result[iz * 2 + width * height] = shortToHigh(depth[i]);
-                    result[iz * 2 + 1 + width * height] = shortToLow(depth[i]);
+                    if (colorByte != 0x00)
+                    {
+                        result[iOutput * 2 + widthOutput * heightOutput] = shortToHigh(depth[iInput]);
+                        result[iOutput * 2 + 1 + widthOutput * heightOutput] = shortToLow(depth[iInput]);
+                    }
                 }
             }
 
-            return LZ4Codec.Wrap(result);
+            return LZ4Codec.WrapHC(result);
         }
 
         public string getSkeletonData()
@@ -72,17 +70,25 @@ namespace NetService.Serializer
             return JsonConvert.SerializeObject(skeleton);
         }
 
-        private byte R8G8B8toR3G3B3(byte r, byte g, byte b)
+        private byte R8G8B8toR3G3B2(byte r, byte g, byte b)
         {
             byte R3_mask = 0b11100000;
             byte G3_mask = 0b00011100;
             byte B2_mask = 0b00000011;
 
-            return (byte)(
+            byte colbyte = (byte)(
                 (r >> 0) & R3_mask
                 | (g >> 3) & G3_mask
                 | (b >> 6) & B2_mask
             );
+
+            // Black is color key. Therefore only return black, if rgb is too
+            if (colbyte == 0x00 && (r != 0x00 || g != 0x00 || b != 0x00))
+            {
+                colbyte = 0x01;
+            }
+
+            return colbyte;
         }
 
         private byte[] downsize(byte[] arr, int skip)
