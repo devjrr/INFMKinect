@@ -1,6 +1,7 @@
 ﻿using Base.ViewModel;
 using KinectLib.Classes;
 using KinectLib.Interfaces;
+using LightBuzz.Vitruvius;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using WpfClient.Enums;
 using WpfClient.Extensions;
@@ -190,7 +192,7 @@ namespace WpfClient
                         {
                             body = _kinectData.GetSkeleton();
                         }
-                        
+
 
                         // Save Json
                         SaveJson("skeleton", null, body);
@@ -199,7 +201,7 @@ namespace WpfClient
 
 
                     }), DispatcherPriority.Background);
-                    
+
                     break;
                 case TabItem.PointCloud:
                     if (PointCloudVisualization == PointCloudVisualization.Color)
@@ -210,47 +212,58 @@ namespace WpfClient
                             var pointCloud = _webServiceProxy.GetColorPointCloud();
                             if (pointCloud == null) return;
 
-                            _pointCloudCanvas.DrawPointCloud(pointCloud);
+                            var width = 256;
+                            var height = 212;
+                            var pixelFormat = PixelFormats.Rgb24;
+                            var bytesPerPixel = 3;
+                            var stride = bytesPerPixel * width;
 
-                            /*
-                            //var bmp = new DirectBitmap(256, 212);
-                            var bmp = new WriteableBitmap(256, 212, Constants.DPI, Constants.DPI, PixelFormats.Bgr24, null);
-
+                            byte[] buffer = new byte[width * height * bytesPerPixel];
 
 
                             foreach (var p in pointCloud)
                             {
-                                // Color
-                                bmp.SetPixel((int)p.GetX(), (int)p.GetY(), Color.FromArgb((int)p.GetR(), (int)p.GetG(), (int)p.GetB()));
+                                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel] = (byte)p.GetR();
+                                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 1] = (byte)p.GetG();
+                                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 2] = (byte)p.GetB();
                             }
-                            
 
-                            // Output
-                            var colorPointCloudFromJson = JsonConvert.DeserializeObject<ColorPointCloud>(json);
-                        
-                            PointCloudImageSource = colorPointCloudFromJson.GenerateImage();
-                            */
+                            var bitmap = BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
+
+
+                            PointCloudImageSource = bitmap;
+
+
                         }), DispatcherPriority.Background);
-                        
+
                     }
                     else if (PointCloudVisualization == PointCloudVisualization.Depth)
                     {
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            // Get Highlighted PointCloud
+                            // Get Depth PointCloud
                             var pointCloud = _webServiceProxy.GetDepthPointCloud();
                             if (pointCloud == null) return;
 
-                            _depthPointCloudCanvas.DrawPointCloud(pointCloud);
+                            var width = 256;
+                            var height = 212;
+                            var pixelFormat = PixelFormats.Gray16;
+                            var bytesPerPixel = 2;
+                            var stride = bytesPerPixel * width;
 
-                            /*
-                            // Output
-                            var highlightedPointCloudFromJson = JsonConvert.DeserializeObject<HighlightedPointCloud>(json);
-                        
-                            PointCloudImageSource = highlightedPointCloudFromJson.GenerateImage();
-                            */
+                            ushort[] buffer = new ushort[width * height];
+
+                            foreach (var p in pointCloud)
+                            {
+                                buffer[width * (int)p.GetY() + (int)p.GetX()] = (ushort)p.GetZ();
+                            }
+
+                            var bitmap = BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
+
+                            PointCloudImageSource = bitmap;
+
                         }), DispatcherPriority.Background);
-                        
+
                     }
                     break;
             }
