@@ -31,8 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LightBuzz.Vitruvius, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\..\WpfClient\packages\lightbuzz-vitruvius.2.0.0\lib\net45\LightBuzz.Vitruvius.dll</HintPath>
+    <Reference Include="LightBuzz.Vitruvius">
+      <HintPath>..\..\ExterneLibs\LightBuzz.Vitruvius.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Kinect, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="Classes\BodyWrapper.cs" />
     <Compile Include="Classes\ColorPointCloud.cs" />
+    <Compile Include="Classes\Constants.cs" />
+    <Compile Include="Classes\FrameCaptureWrapper.cs" />
     <Compile Include="Classes\KinectData.cs" />
     <Compile Include="ControlStrategy\ClosestPerson.cs" />
     <Compile Include="ControlStrategy\FirstPerson.cs" />

@@ -1,7 +1,7 @@
-﻿using LightBuzz.Vitruvius;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using KinectLib.Classes;
 using WpfClient.Enums;
 using WpfClient.Extensions;
 
@@ -78,15 +78,13 @@ namespace WpfClient
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var capture = new FrameCapture();
-
             switch (_vm.SelectedTabItem)
             {
                 case Enums.TabItem.Skeleton:
                     SkeletonCanvas.SaveToFile(filename: "skeleton_" + DateTime.Now.Ticks + ".jpg");
                     break;
                 case Enums.TabItem.PointCloud:
-                    capture.Save(_vm.PointCloudImageSource, "pointCloud_" + DateTime.Now.Ticks + ".jpg");
+                    FrameCaptureWrapper.SaveImage(_vm.PointCloudImageSource, "pointCloud_" + DateTime.Now.Ticks + ".jpg");
                     break;
             }
         }

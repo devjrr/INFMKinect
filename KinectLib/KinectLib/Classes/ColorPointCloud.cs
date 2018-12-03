@@ -1,5 +1,4 @@
-﻿using LightBuzz.Vitruvius;
-using Microsoft.Kinect;
+﻿using Microsoft.Kinect;
 using System;
 
 namespace KinectLib.Classes

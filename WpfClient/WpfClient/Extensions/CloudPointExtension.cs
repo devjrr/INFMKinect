@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using LightBuzz.Vitruvius;
+using KinectLib.Classes;
 using NetClientLib;
 
 namespace WpfClient.Extensions
