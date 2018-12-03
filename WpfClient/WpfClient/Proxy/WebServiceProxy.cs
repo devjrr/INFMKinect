@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml;
+﻿using System.Collections.Generic;
 using NetClientLib;
-using RestSharp;
 
 namespace WpfClient.Proxy
 {
     public class WebServiceProxy
     {
         #region Fields
-        private IRemoteService _restClient;
+        private readonly IRemoteService _restClient;
         #endregion
 
 
@@ -20,7 +17,7 @@ namespace WpfClient.Proxy
             _restClient = RemoteServiceBuilder.GetRemoteService();
         }
 
-        public String GetSkeleton()
+        public string GetSkeleton()
         {
             var response = _restClient.GetSkeletonData();
             return response;
@@ -38,21 +35,6 @@ namespace WpfClient.Proxy
             var response = _restClient.GetCloudpoints();
 
             return response;
-        }
-        #endregion
-
-        #region Methods
-
-        private String GetData(IRestResponse iResponse)
-        {
-            var json = iResponse.Content;
-            if (string.IsNullOrEmpty(json)) return null;
-
-            var xml = new XmlDocument();
-            xml.LoadXml(json);
-            if (string.IsNullOrEmpty(xml.InnerText)) return null;
-
-            return xml.InnerText;
         }
         #endregion
     }

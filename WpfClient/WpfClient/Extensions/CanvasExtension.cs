@@ -1,20 +1,17 @@
-﻿using System.Collections.Generic;
-using KinectLib.Classes;
-using Microsoft.Kinect;
+﻿using Microsoft.Kinect;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using KinectLib.Interfaces;
-using NetClientLib;
 
 namespace WpfClient.Extensions
 {
     public static class CanvasExtension
     {
 
-        private static readonly Brush _handClosedBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
-        private static readonly Brush _handOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
-        private static readonly Brush _handLassoBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
+        private static readonly Brush HandClosedBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
+        private static readonly Brush HandOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
+        private static readonly Brush HandLassoBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
 
         public static Joint ScaleTo(this Joint joint, double width, double height, float skeletonMaxX, float skeletonMaxY)
         {
@@ -35,7 +32,7 @@ namespace WpfClient.Extensions
 
         private static float Scale(double maxPixel, double maxSkeleton, float position)
         {
-            float value = (float)((((maxPixel / maxSkeleton) / 2) * position) + (maxPixel / 2));
+            var value = (float)((((maxPixel / maxSkeleton) / 2) * position) + (maxPixel / 2));
 
             if (value > maxPixel)
             {
@@ -49,12 +46,6 @@ namespace WpfClient.Extensions
 
             return value;
         }
-
-        public static void DrawPointCloud(this Canvas cancas, IList<CloudPoint> iCloudPoint)
-        {
-
-        }
-
 
         public static void DrawSkeleton(this Canvas canvas, IBodyWrapper body)
         {
@@ -95,7 +86,7 @@ namespace WpfClient.Extensions
             canvas.DrawLine(body.Joints[JointType.KneeLeft], body.Joints[JointType.AnkleLeft]);
             canvas.DrawLine(body.Joints[JointType.AnkleLeft], body.Joints[JointType.FootLeft]);
 
-            foreach (Joint joint in body.Joints.Values)
+            foreach (var joint in body.Joints.Values)
             {
                 canvas.DrawPoint(joint);
             }
@@ -111,7 +102,7 @@ namespace WpfClient.Extensions
 
             joint = joint.ScaleTo(canvas.ActualWidth, canvas.ActualHeight);
 
-            Ellipse ellipse = new Ellipse
+            var ellipse = new Ellipse
             {
                 Width = 12,
                 Height = 12,
@@ -139,7 +130,7 @@ namespace WpfClient.Extensions
                 stroke = new SolidColorBrush(Colors.Red);
             }
 
-            Line line = new Line
+            var line = new Line
             {
                 X1 = first.Position.X,
                 Y1 = first.Position.Y,
@@ -152,23 +143,23 @@ namespace WpfClient.Extensions
             canvas.Children.Add(line);
         }
 
-        private static void DrawHand(this Canvas canvas, HandState handState, Joint joint)
+        private static void DrawHand(this Panel canvas, HandState handState, Joint joint)
         {
             var brush = new SolidColorBrush(Colors.Transparent);
             switch (handState)
             {
                 case HandState.Closed:
-                    brush = (SolidColorBrush) _handClosedBrush;
+                    brush = (SolidColorBrush) HandClosedBrush;
                     break;
                 case HandState.Open:
-                    brush = (SolidColorBrush) _handOpenBrush;
+                    brush = (SolidColorBrush) HandOpenBrush;
                     break;
                 case HandState.Lasso:
-                    brush = (SolidColorBrush) _handLassoBrush;
+                    brush = (SolidColorBrush) HandLassoBrush;
                     break;
             }
 
-            Ellipse ellipse = new Ellipse
+            var ellipse = new Ellipse
             {
                 Width = 120,
                 Height = 120,

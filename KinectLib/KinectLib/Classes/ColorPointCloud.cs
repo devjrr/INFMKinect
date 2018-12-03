@@ -1,8 +1,6 @@
 ﻿using LightBuzz.Vitruvius;
 using Microsoft.Kinect;
 using System;
-using System.Collections.Generic;
-using System.Windows.Media.Animation;
 
 namespace KinectLib.Classes
 {

@@ -38,7 +38,9 @@ namespace WpfClient
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             _vm = DataContext as MainViewModel;
-            _vm.Init(SkeletonCanvas, new Canvas(), new Canvas());
+            if(_vm == null) return;
+
+            _vm.Init(SkeletonCanvas);
             MainTabControl.SelectionChanged += MainTabControl_SelectionChanged;
         }
 

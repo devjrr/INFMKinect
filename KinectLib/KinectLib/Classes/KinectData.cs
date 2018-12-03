@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using KinectLib.ControlStrategy;
+﻿using KinectLib.ControlStrategy;
 using KinectLib.Interfaces;
 using Microsoft.Kinect;
 
@@ -44,7 +39,7 @@ namespace KinectLib.Classes
         #endregion
 
         #region Events
-        void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
+        private void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             if (_readFrame) return;
 

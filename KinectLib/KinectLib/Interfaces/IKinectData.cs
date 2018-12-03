@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using KinectLib.Classes;
-
-namespace KinectLib.Interfaces
+﻿namespace KinectLib.Interfaces
 {
     public interface IKinectData
     {
 
-        /***
-         * Contains the information if a pixel is part of the body (512x424)
-         */
+        /// <summary>
+        /// Contains the information if a pixel is part of the body (512x424)
+        /// </summary>
+        /// <returns>information if a pixel is a bodypart</returns>
         bool[] GetBodyData();
 
-        /***
-         * Contains the color information of the image. Every three values build a BGR tripple (512x424x3)
-         */
+        /// <summary>
+        /// Contains the color information of the image. Every three values build a BGR tripple (512x424x3)
+        /// </summary>
+        /// <returns>Colorinformation in a byte array</returns>
         byte[] GetColorData();
 
-        /***
-         * Contains the depth information of the image (512x424)
-         */
+        /// <summary>
+        /// Contains the depth information of the image (512x424)
+        /// </summary>
+        /// <returns>Depth data as ushort[]</returns>
         ushort[] GetDepthData();
 
-        /***
-         * returns the skeleton data as IBodyWrapper
-         */
+        /// <summary>
+        /// returns the skeleton data as IBodyWrapper
+        /// </summary>
+        /// <returns>Skeleton Data as IBodyWrapper</returns>
         IBodyWrapper GetSkeleton();
 
         /// <summary>

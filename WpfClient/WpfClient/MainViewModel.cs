@@ -3,13 +3,16 @@ using KinectLib.Classes;
 using KinectLib.Interfaces;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using NetClientLib;
 using WpfClient.Enums;
 using WpfClient.Extensions;
 using WpfClient.Properties;
@@ -30,8 +33,6 @@ namespace WpfClient
         private readonly WebServiceProxy _webServiceProxy;
 
         private Canvas _skeletonCanvas;
-        private Canvas _pointCloudCanvas;
-        private Canvas _depthPointCloudCanvas;
         #endregion
 
         #region Constructor
@@ -116,11 +117,9 @@ namespace WpfClient
 
         #region Methods
 
-        public void Init(Canvas iCanvas, Canvas iCanvas2, Canvas iCanvas3)
+        public void Init(Canvas iCanvas)
         {
             _skeletonCanvas = iCanvas;
-            _pointCloudCanvas = iCanvas2;
-            _depthPointCloudCanvas = iCanvas3;
         }
 
         private void CheckKinectConnected()
@@ -134,32 +133,104 @@ namespace WpfClient
             _kinectData.Shutdown();
         }
 
-        private void SaveJson(String iFileNamePrefix, String iJson, Object iObject)
+        private void SaveJson(string iFileNamePrefix, string iJson, object iObject)
         {
             if (_saveJson)
             {
                 Task.Run(() =>
                 {
                     var tick = DateTime.Now.Ticks;
-                    if (!File.Exists(iFileNamePrefix + tick + ".json"))
-                    {
-                        var json = iJson;
-                        if (string.IsNullOrEmpty(json))
-                        {
-                            json = JsonConvert.SerializeObject(iObject);
-                        }
+                    if (File.Exists(iFileNamePrefix + tick + ".json")) return;
 
-                        try
-                        {
-                            File.WriteAllText(iFileNamePrefix + tick + ".json", json);
-                        }
-                        catch (Exception)
-                        {
-                            // ignored
-                        }
+                    var json = iJson;
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        json = JsonConvert.SerializeObject(iObject);
+                    }
+
+                    try
+                    {
+                        File.WriteAllText(iFileNamePrefix + tick + ".json", json);
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
                     }
                 });
             }
+        }
+
+        private WriteableBitmap GenerateImageFromPointCloud(IEnumerable<CloudPoint> iCloudPoints, PointCloudVisualization iPointCloudVisualization = PointCloudVisualization.Color)
+        {
+            //http://csharphelper.com/blog/2015/07/set-the-pixels-in-a-wpf-bitmap-in-c/
+
+            const int height = 424;
+            const int width = 512;
+
+            var wbitmap = new WriteableBitmap(pixelWidth: width, pixelHeight: height, dpiX: 96, dpiY: 96,
+                                              pixelFormat: PixelFormats.Default, palette: null);
+
+
+            var pixels = new byte[height, width, 4];
+
+            // Clear to black.
+            for (var row = 0; row < height; row++)
+            {
+                for (var col = 0; col < width; col++)
+                {
+                    for (var i = 0; i < 3; i++)
+                    {
+                        pixels[row, col, i] = 0;
+                    }
+                    pixels[row, col, 3] = 255;
+                }
+            }
+
+            foreach (var cloudPoint in iCloudPoints)
+            {
+                if (iPointCloudVisualization == PointCloudVisualization.Color)
+                {
+                    // Blue
+                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 0] = (byte)cloudPoint.GetB();
+                    // Green
+                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 1] = (byte)cloudPoint.GetG();
+                    // Red
+                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 2] = (byte)cloudPoint.GetR();
+                }
+                else
+                {
+                    // Blue
+                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 0] = (byte)(cloudPoint.GetZ() % 4096);
+                    // Green
+                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 1] = (byte)(cloudPoint.GetZ() % 4096);
+                    // Red
+                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 2] = (byte)(cloudPoint.GetZ() % 4096);
+                }
+
+                // Alpha
+                pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 3] = 255;
+            }
+
+            // Copy the data into a one-dimensional array.
+            var pixels1D = new byte[height * width * 4];
+            var index = 0;
+            for (var row = 0; row < height; row++)
+            {
+                for (var col = 0; col < width; col++)
+                {
+                    for (var i = 0; i < 4; i++)
+                    {
+                        pixels1D[index++] = pixels[row, col, i];
+                    }
+                        
+                }
+            }
+
+            var rect = new Int32Rect(0, 0, width, height);
+            const int stride = 4 * width;
+            wbitmap.WritePixels(rect, pixels1D, stride, 0);
+
+            return wbitmap;
         }
 
         #endregion
@@ -170,8 +241,8 @@ namespace WpfClient
             // Check Kinect Status
             CheckKinectConnected();
 
-            string json = null;
-            IBodyWrapper body = null;
+            string json;
+            IBodyWrapper body;
 
             switch (SelectedTabItem)
             {
@@ -210,21 +281,9 @@ namespace WpfClient
                             var pointCloud = _webServiceProxy.GetColorPointCloud();
                             if (pointCloud == null) return;
 
-                            _pointCloudCanvas.DrawPointCloud(pointCloud);
-
+                            PointCloudImageSource = GenerateImageFromPointCloud(pointCloud);
+                           
                             /*
-                            //var bmp = new DirectBitmap(256, 212);
-                            var bmp = new WriteableBitmap(256, 212, Constants.DPI, Constants.DPI, PixelFormats.Bgr24, null);
-
-
-
-                            foreach (var p in pointCloud)
-                            {
-                                // Color
-                                bmp.SetPixel((int)p.GetX(), (int)p.GetY(), Color.FromArgb((int)p.GetR(), (int)p.GetG(), (int)p.GetB()));
-                            }
-                            
-
                             // Output
                             var colorPointCloudFromJson = JsonConvert.DeserializeObject<ColorPointCloud>(json);
                         
@@ -241,7 +300,8 @@ namespace WpfClient
                             var pointCloud = _webServiceProxy.GetDepthPointCloud();
                             if (pointCloud == null) return;
 
-                            _depthPointCloudCanvas.DrawPointCloud(pointCloud);
+                            PointCloudImageSource =
+                                GenerateImageFromPointCloud(pointCloud, PointCloudVisualization.Depth);
 
                             /*
                             // Output

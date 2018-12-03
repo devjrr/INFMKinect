@@ -66,7 +66,7 @@ namespace NetService.RestService
                 Console.SetCursorPosition(x, 5);
                 Console.Write(s);
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (ArgumentOutOfRangeException)
             {
 
             }
@@ -76,7 +76,7 @@ namespace NetService.RestService
                 {
                     Console.SetCursorPosition(origRow, origCol);
                 }
-                catch (ArgumentOutOfRangeException e)
+                catch (ArgumentOutOfRangeException)
                 {
                 }
             }

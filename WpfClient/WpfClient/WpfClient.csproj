@@ -95,7 +95,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Extensions\CanvasExtension.cs" />
-    <Compile Include="Extensions\ColorPointCloudExtension.cs" />
     <Compile Include="Extensions\HighlightedPointCloudExtension.cs" />
     <Compile Include="Proxy\WebServiceProxy.cs" />
     <Page Include="MainWindow.xaml">
@@ -106,10 +105,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\SkeletonBase.cs" />
     <Compile Include="Enums\PointCloudVisualization.cs" />
     <Compile Include="Enums\TabItem.cs" />
-    <Compile Include="Extensions\DrawingGroupExtenstion.cs" />
     <Compile Include="Extensions\DrawingImageExtension.cs" />
     <Compile Include="MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
