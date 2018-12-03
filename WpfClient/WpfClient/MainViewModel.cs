@@ -4,7 +4,6 @@ using KinectLib.Interfaces;
 using LightBuzz.Vitruvius;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
@@ -13,7 +12,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using NetClientLib;
 using WpfClient.Enums;
 using WpfClient.Extensions;
 using WpfClient.Properties;
@@ -161,79 +159,6 @@ namespace WpfClient
             }
         }
 
-        private WriteableBitmap GenerateImageFromPointCloud(IEnumerable<CloudPoint> iCloudPoints, PointCloudVisualization iPointCloudVisualization = PointCloudVisualization.Color)
-        {
-            //http://csharphelper.com/blog/2015/07/set-the-pixels-in-a-wpf-bitmap-in-c/
-
-            const int height = 424;
-            const int width = 512;
-
-            var wbitmap = new WriteableBitmap(pixelWidth: width, pixelHeight: height, dpiX: 96, dpiY: 96,
-                                              pixelFormat: PixelFormats.Default, palette: null);
-
-
-            var pixels = new byte[height, width, 4];
-
-            // Clear to black.
-            for (var row = 0; row < height; row++)
-            {
-                for (var col = 0; col < width; col++)
-                {
-                    for (var i = 0; i < 3; i++)
-                    {
-                        pixels[row, col, i] = 0;
-                    }
-                    pixels[row, col, 3] = 255;
-                }
-            }
-
-            foreach (var cloudPoint in iCloudPoints)
-            {
-                if (iPointCloudVisualization == PointCloudVisualization.Color)
-                {
-                    // Blue
-                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 0] = (byte)cloudPoint.GetB();
-                    // Green
-                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 1] = (byte)cloudPoint.GetG();
-                    // Red
-                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 2] = (byte)cloudPoint.GetR();
-                }
-                else
-                {
-                    // Blue
-                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 0] = (byte)(cloudPoint.GetZ() % 4096);
-                    // Green
-                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 1] = (byte)(cloudPoint.GetZ() % 4096);
-                    // Red
-                    pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 2] = (byte)(cloudPoint.GetZ() % 4096);
-                }
-
-                // Alpha
-                pixels[(int)cloudPoint.GetY(), (int)cloudPoint.GetX(), 3] = 255;
-            }
-
-            // Copy the data into a one-dimensional array.
-            var pixels1D = new byte[height * width * 4];
-            var index = 0;
-            for (var row = 0; row < height; row++)
-            {
-                for (var col = 0; col < width; col++)
-                {
-                    for (var i = 0; i < 4; i++)
-                    {
-                        pixels1D[index++] = pixels[row, col, i];
-                    }
-                        
-                }
-            }
-
-            var rect = new Int32Rect(0, 0, width, height);
-            const int stride = 4 * width;
-            wbitmap.WritePixels(rect, pixels1D, stride, 0);
-
-            return wbitmap;
-        }
-
         #endregion
 
         #region Events
@@ -282,13 +207,13 @@ namespace WpfClient
                             var pointCloud = _webServiceProxy.GetColorPointCloud();
                             if (pointCloud == null) return;
 
-                            var width = 256;
-                            var height = 212;
+                            const int width = 256;
+                            const int height = 212;
                             var pixelFormat = PixelFormats.Rgb24;
-                            var bytesPerPixel = 3;
-                            var stride = bytesPerPixel * width;
+                            const int bytesPerPixel = 3;
+                            const int stride = bytesPerPixel * width;
 
-                            byte[] buffer = new byte[width * height * bytesPerPixel];
+                            var buffer = new byte[width * height * bytesPerPixel];
 
 
                             foreach (var p in pointCloud)
@@ -315,13 +240,13 @@ namespace WpfClient
                             var pointCloud = _webServiceProxy.GetDepthPointCloud();
                             if (pointCloud == null) return;
 
-                            var width = 256;
-                            var height = 212;
+                            const int width = 256;
+                            const int height = 212;
                             var pixelFormat = PixelFormats.Gray16;
-                            var bytesPerPixel = 2;
-                            var stride = bytesPerPixel * width;
+                            const int bytesPerPixel = 2;
+                            const int stride = bytesPerPixel * width;
 
-                            ushort[] buffer = new ushort[width * height];
+                            var buffer = new ushort[width * height];
 
                             foreach (var p in pointCloud)
                             {
