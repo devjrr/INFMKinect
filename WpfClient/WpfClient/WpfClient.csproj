@@ -95,7 +95,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Extensions\CanvasExtension.cs" />
-    <Compile Include="Extensions\HighlightedPointCloudExtension.cs" />
+    <Compile Include="Extensions\CloudPointExtension.cs" />
     <Compile Include="Proxy\WebServiceProxy.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -107,7 +107,6 @@
     </Compile>
     <Compile Include="Enums\PointCloudVisualization.cs" />
     <Compile Include="Enums\TabItem.cs" />
-    <Compile Include="Extensions\DrawingImageExtension.cs" />
     <Compile Include="MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

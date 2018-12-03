@@ -2,7 +2,6 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using WpfClient.Enums;
 using WpfClient.Extensions;
 
@@ -65,7 +64,6 @@ namespace WpfClient
 
         #region Click Events
 
-
         private void PointCloudColorButton_Click(object sender, RoutedEventArgs e)
         {
             _vm.PointCloudVisualization = PointCloudVisualization.Color;
@@ -85,13 +83,14 @@ namespace WpfClient
             switch (_vm.SelectedTabItem)
             {
                 case Enums.TabItem.Skeleton:
-                    capture.Save(((DrawingImage)_vm.SkeletonImageSource).ToBitmapSource(), "skeleton_" + DateTime.Now.Ticks + ".jpg");
+                    SkeletonCanvas.SaveToFile(filename: "skeleton_" + DateTime.Now.Ticks + ".jpg");
                     break;
                 case Enums.TabItem.PointCloud:
                     capture.Save(_vm.PointCloudImageSource, "pointCloud_" + DateTime.Now.Ticks + ".jpg");
                     break;
             }
         }
+
         #endregion
 
         #endregion

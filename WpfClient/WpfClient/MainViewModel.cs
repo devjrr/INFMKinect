@@ -1,7 +1,6 @@
 ﻿using Base.ViewModel;
 using KinectLib.Classes;
 using KinectLib.Interfaces;
-using LightBuzz.Vitruvius;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -25,7 +24,7 @@ namespace WpfClient
         #region Fields
         private readonly bool _saveJson;
 
-        private readonly IKinectData _kinectData;
+        private readonly IKinectData _kinectData = new KinectData();
         private bool _dataFromWebService;
 
         // Webservice Timer
@@ -38,8 +37,6 @@ namespace WpfClient
         public MainViewModel()
         {
             _saveJson = Settings.Default.SaveJson;
-
-            _kinectData = new KinectData();
 
             CheckKinectConnected();
 
@@ -62,18 +59,6 @@ namespace WpfClient
                 if (Equals(_statusText, value)) return;
                 _statusText = value;
                 OnPropertyChanged("StatusText");
-            }
-        }
-
-        private ImageSource _skeletonImageSource;
-        public ImageSource SkeletonImageSource
-        {
-            get => _skeletonImageSource;
-            set
-            {
-                if (Equals(_skeletonImageSource, value)) return;
-                _skeletonImageSource = value;
-                OnPropertyChanged("SkeletonImageSource");
             }
         }
 
@@ -124,7 +109,7 @@ namespace WpfClient
         private void CheckKinectConnected()
         {
             StatusText = _kinectData.IsKinectConnected() ? Resources.RunningStatusText : Resources.SensorNotAvailableStatusText;
-            _dataFromWebService = !_kinectData.IsKinectConnected();
+            _dataFromWebService = _kinectData.IsKinectConnected();
         }
 
         public void Close()
@@ -173,7 +158,7 @@ namespace WpfClient
             switch (SelectedTabItem)
             {
                 case TabItem.Skeleton:
-                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
                     {
 
                         if (_dataFromWebService)
@@ -199,72 +184,44 @@ namespace WpfClient
 
                     break;
                 case TabItem.PointCloud:
-                    if (PointCloudVisualization == PointCloudVisualization.Color)
+                    Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        BitmapSource pointCloud = null;
+                        if (_dataFromWebService)
                         {
-                            // Get Color PointCloud
-                            var pointCloud = _webServiceProxy.GetColorPointCloud();
-                            if (pointCloud == null) return;
-
-                            const int width = 256;
-                            const int height = 212;
-                            var pixelFormat = PixelFormats.Rgb24;
-                            const int bytesPerPixel = 3;
-                            const int stride = bytesPerPixel * width;
-
-                            var buffer = new byte[width * height * bytesPerPixel];
-
-
-                            foreach (var p in pointCloud)
+                            if (PointCloudVisualization == PointCloudVisualization.Color)
                             {
-                                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel] = (byte)p.GetR();
-                                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 1] = (byte)p.GetG();
-                                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 2] = (byte)p.GetB();
+                                // Get Color PointCloud
+                                pointCloud = _webServiceProxy.GetColorPointCloud();
                             }
-
-                            var bitmap = BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
-
-
-                            PointCloudImageSource = bitmap;
-
-
-                        }), DispatcherPriority.Background);
-
-                    }
-                    else if (PointCloudVisualization == PointCloudVisualization.Depth)
-                    {
-                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                            else if (PointCloudVisualization == PointCloudVisualization.Depth)
+                            {
+                                // Get Depth PointCloud
+                                pointCloud = _webServiceProxy.GetDepthPointCloud();
+                            }
+                        }
+                        else
                         {
-                            // Get Depth PointCloud
-                            var pointCloud = _webServiceProxy.GetDepthPointCloud();
-                            if (pointCloud == null) return;
-
-                            const int width = 256;
-                            const int height = 212;
-                            var pixelFormat = PixelFormats.Gray16;
-                            const int bytesPerPixel = 2;
-                            const int stride = bytesPerPixel * width;
-
-                            var buffer = new ushort[width * height];
-
-                            foreach (var p in pointCloud)
+                            if (PointCloudVisualization == PointCloudVisualization.Color)
                             {
-                                buffer[width * (int)p.GetY() + (int)p.GetX()] = (ushort)p.GetZ();
+                                // Get Color PointCloud
+                                pointCloud = _kinectData.GetColorData().GenerateColorBitmap(_kinectData.GetBodyData());
                             }
+                            else if (PointCloudVisualization == PointCloudVisualization.Depth)
+                            {
+                                // Get Depth PointCloud
+                                pointCloud = _kinectData.GetDepthData().GenerateDepthBitmap(_kinectData.GetBodyData());
+                            }
+                        }
 
-                            var bitmap = BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
+                        if (pointCloud == null) return;
 
-                            PointCloudImageSource = bitmap;
+                        PointCloudImageSource = pointCloud;
 
-                        }), DispatcherPriority.Background);
-
-                    }
+                    }), DispatcherPriority.Background);
                     break;
             }
         }
         #endregion
     }
-
-
 }

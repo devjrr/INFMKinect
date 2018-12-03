@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Windows.Media.Imaging;
 using NetClientLib;
+using WpfClient.Extensions;
 
 namespace WpfClient.Proxy
 {
@@ -23,18 +24,22 @@ namespace WpfClient.Proxy
             return response;
         }
 
-        public IList<CloudPoint> GetColorPointCloud()
+        public BitmapSource GetColorPointCloud()
         {
             var response = _restClient.GetCloudpoints();
 
-            return response;
+            var bitmap = response.GenerateColorBitmap();
+
+            return bitmap;
         }
 
-        public IList<CloudPoint> GetDepthPointCloud()
+        public BitmapSource GetDepthPointCloud()
         {
             var response = _restClient.GetCloudpoints();
 
-            return response;
+            var bitmap = response.GenerateDepthBitmap();
+
+            return bitmap;
         }
         #endregion
     }

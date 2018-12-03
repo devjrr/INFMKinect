@@ -1,6 +1,9 @@
-﻿using Microsoft.Kinect;
+﻿using System.IO;
+using System.Windows;
+using Microsoft.Kinect;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using KinectLib.Interfaces;
 
@@ -172,6 +175,40 @@ namespace WpfClient.Extensions
             Canvas.SetTop(ellipse, joint.Position.Y - ellipse.Height / 2);
 
             canvas.Children.Add(ellipse);
+        }
+
+        /// <summary>
+        /// Save the content of an canvas to a file.
+        /// https://stackoverflow.com/questions/5851168/save-canvas-to-bitmap
+        /// </summary>
+        /// <param name="surface">input canvas</param>
+        /// <param name="filename">desired filename</param>
+        public static void SaveToFile(this Canvas surface, string filename)
+        {
+            var size = new Size(surface.ActualWidth, surface.ActualHeight);
+
+            surface.Measure(size);
+            surface.Arrange(new Rect(size));
+
+            // Create a render bitmap and push the surface to it
+            var renderBitmap =
+                new RenderTargetBitmap(
+                    (int)size.Width,
+                    (int)size.Height,
+                    96d,
+                    96d,
+                    PixelFormats.Pbgra32);
+            renderBitmap.Render(surface);
+
+            // Create a file stream for saving image
+            using (var outStream = new FileStream(filename, FileMode.Create))
+            {
+                var encoder = new BmpBitmapEncoder();
+                // push the rendered bitmap to it
+                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+                // save the data to the stream
+                encoder.Save(outStream);
+            }
         }
     }
 }
