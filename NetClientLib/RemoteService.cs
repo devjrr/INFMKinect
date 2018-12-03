@@ -10,17 +10,20 @@ namespace NetClientLib
 {
     class RemoteService : IRemoteService
     {
-        System.Net.WebClient client = new System.Net.WebClient();
+        private readonly string url;
 
         private LoadCounter download = new LoadCounter();
         private LoadCounter upload = new LoadCounter();
 
-        private const int width = 256;
-        private const int height = 212;
+        private readonly int width;
+        private readonly int height;
 
-        public RemoteService()
+
+        public RemoteService(string url, int height, int width)
         {
-
+            this.url = url;
+            this.height = height;
+            this.width = width;
         }
 
 
@@ -95,7 +98,7 @@ namespace NetClientLib
 
         private string HtmlGet(string service)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost:56789/" + service);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url + service);
             request.Method = "GET";
             request.ContentType = "text/plain";
             string test = string.Empty;
