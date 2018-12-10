@@ -21,9 +21,9 @@ namespace WpfClient.Extensions
 
             foreach (var p in iCloudPoint)
             {
-                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel] = (byte)p.GetR();
-                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 1] = (byte)p.GetG();
-                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 2] = (byte)p.GetB();
+                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel] = (byte)(p.GetR() * 256);
+                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 1] = (byte)(p.GetG() * 256);
+                buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 2] = (byte)(p.GetB() * 256);
             }
 
             return BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
@@ -41,7 +41,7 @@ namespace WpfClient.Extensions
 
             foreach (var p in iCloudPoint)
             {
-                buffer[width * (int)p.GetY() + (int)p.GetX()] = (ushort)p.GetZ();
+                buffer[width * (int)p.GetY() + (int)p.GetX()] = (ushort)(p.GetZ() * 256);
             }
 
             return BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);

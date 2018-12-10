@@ -109,7 +109,7 @@ namespace WpfClient
         private void CheckKinectConnected()
         {
             StatusText = _kinectData.IsKinectConnected() ? Resources.RunningStatusText : Resources.SensorNotAvailableStatusText;
-            _dataFromWebService = _kinectData.IsKinectConnected();
+            _dataFromWebService = !_kinectData.IsKinectConnected();
         }
 
         public void Close()
