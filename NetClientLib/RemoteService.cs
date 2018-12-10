@@ -55,9 +55,9 @@ namespace NetClientLib
 
                     float x = i % width;
                     float y = i / width;
-                    float z = bytesToShort(vs[i * 2 + (width * height)], vs[i * 2 + (width * height) + 1]);
+                    float z = bytesToShort(vs[i * 2 + width * height + 1], vs[i * 2 + width * height]);
 
-                    points.Add(new CloudPoint(r, g, b, x, y, z));
+                    points.Add(new CloudPoint(r/256, g/256, b/256, x, y, z));
 
                 }
             }
@@ -65,7 +65,7 @@ namespace NetClientLib
             return points;
         }
 
-        public String GetSkeletonData()
+        public string GetSkeletonData()
         {
             return HtmlGet("SkeletonData");
         }
