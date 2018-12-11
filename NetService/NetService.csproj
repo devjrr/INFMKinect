@@ -47,6 +47,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="LZ4, Version=1.0.15.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd, processorArchitecture=MSIL">
       <HintPath>..\WpfClient\packages\lz4net.1.0.15.93\lib\net4-client\LZ4.dll</HintPath>
@@ -59,6 +63,7 @@
     <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Framerate.cs" />
@@ -73,10 +78,12 @@
     </Compile>
     <Compile Include="RestService\IService.cs" />
     <Compile Include="RestService\RestService.cs" />
+    <Compile Include="Serializer\DemoTransportData.cs" />
     <Compile Include="Serializer\SingleFrameTransportData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="app.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

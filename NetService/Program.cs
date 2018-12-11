@@ -14,7 +14,7 @@ namespace NetService
         static void Main(string[] args)
         {
             IKinectData source = new KinectData();
-            ISerializer serializer = new SingleFrameTransportData(source);
+            ISerializer serializer = source.IsKinectConnected() ? new SingleFrameTransportData(source) : DemoTransportData.ReadfromLocalFiles();
             INetService service = new RestService.RestService(serializer);
             service.run();
         }

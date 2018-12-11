@@ -25,7 +25,7 @@ namespace TestClient
             InitializeComponent();
             Text = "offline";
 
-            timer.Interval = 1000 / 120;
+            timer.Interval = 1000 / 500;
             timer.Elapsed += OnTimerTick;
             timer.Start();
         }
@@ -62,7 +62,7 @@ namespace TestClient
                         foreach (CloudPoint p in cloudpoints)
                         {
                             // Color
-                            bmp.SetPixel((int)p.GetX(), (int)p.GetY(), Color.FromArgb((int)p.GetR(), (int)p.GetG(), (int)p.GetB()));
+                            bmp.SetPixel((int)p.GetX(), (int)p.GetY(), Color.FromArgb((int)(p.GetR() * 256), (int)(p.GetG() * 256), (int)(p.GetB() * 256)));
 
                             // Depth
                             bmp.SetPixel((int)p.GetX() + 512, (int)p.GetY(), Color.FromArgb((byte)(p.GetZ() % 4096), (byte)(p.GetZ() % 4096), (byte)(p.GetZ() % 4096)));
