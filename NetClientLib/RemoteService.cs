@@ -5,11 +5,13 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Xml;
+using UnityEngine;
 
 namespace NetClientLib
 {
     class RemoteService : IRemoteService
     {
+        private readonly Deserializer deserializer;
         private readonly string url;
 
         private LoadCounter download = new LoadCounter();
@@ -19,8 +21,9 @@ namespace NetClientLib
         private readonly int height;
 
 
-        public RemoteService(string url, int height, int width)
+        public RemoteService(Deserializer deserializer, string url, int height, int width)
         {
+            this.deserializer = deserializer;
             this.url = url;
             this.height = height;
             this.width = width;
@@ -36,33 +39,7 @@ namespace NetClientLib
                 return null;
             }
 
-            byte[] vs = LZ4Codec.Unwrap(Convert.FromBase64String(inner));
-
-
-            IList<CloudPoint> points = new List<CloudPoint>(height * width);
-            for (int i = 0; i < width * height; i++)
-            {
-                if (vs[i] != 0x00)
-                {
-                    // Convert R3G3B2 to R8G8B8
-                    byte color = vs[i];
-                    byte mask = 0b11100000;
-
-                    float r = color & mask;
-                    float g = (color << 3) & mask;
-                    float b = (color << 6) & mask;
-
-
-                    float x = i % width;
-                    float y = i / width;
-                    float z = bytesToShort(vs[i * 2 + width * height + 1], vs[i * 2 + width * height]);
-
-                    points.Add(new CloudPoint(r/256, g/256, b/256, x, y, z));
-
-                }
-            }
-
-            return points;
+            return deserializer.deserialze(inner, height, width);
         }
 
         public string GetSkeletonData()
