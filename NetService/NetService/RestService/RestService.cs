@@ -15,7 +15,7 @@ namespace NetService.RestService
 
         public RestService(ISerializer source)
         {
-            int port = Properties.Settings.Default.Port;
+            int port = Properties.Settings.Default.PORT;
             this.source = source;
             Uri url = new Uri("http://localhost:" + port);
             serviceHost = new WebServiceHost(this as IService, url);

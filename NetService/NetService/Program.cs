@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using KinectLib.Classes;
 
 namespace NetService
@@ -14,6 +14,7 @@ namespace NetService
         static void Main(string[] args)
         {
             IKinectData source = new KinectData();
+            Thread.Sleep(500);
             ISerializer serializer = source.IsKinectConnected() ? new SingleFrameTransportData(source) : DemoTransportData.ReadfromLocalFiles();
             INetService service = new RestService.RestService(serializer);
             service.run();

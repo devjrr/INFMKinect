@@ -1,8 +1,8 @@
-﻿using Base.ViewModel;
-using KinectLib.Classes;
+﻿using KinectLib.Classes;
 using KinectLib.Interfaces;
 using Newtonsoft.Json;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
@@ -19,7 +19,7 @@ using TabItem = WpfClient.Enums.TabItem;
 
 namespace WpfClient
 {
-    public class MainViewModel : BaseViewModel
+    public class MainViewModel : INotifyPropertyChanged
     {
         #region Fields
         private readonly bool _saveJson;
@@ -221,6 +221,14 @@ namespace WpfClient
                     }), DispatcherPriority.Background);
                     break;
             }
+        }
+        #endregion
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
     }

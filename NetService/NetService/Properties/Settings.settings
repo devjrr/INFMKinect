@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="NetService.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="Port" Type="System.Int32" Scope="Application">
+    <Setting Name="PORT" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">56789</Value>
     </Setting>
   </Settings>

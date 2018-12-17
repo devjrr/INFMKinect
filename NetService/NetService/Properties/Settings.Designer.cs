@@ -23,12 +23,15 @@ namespace NetService.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("56789")]
-        public int Port {
+        public int PORT {
             get {
-                return ((int)(this["Port"]));
+                return ((int)(this["PORT"]));
+            }
+            set {
+                this["PORT"] = value;
             }
         }
     }
