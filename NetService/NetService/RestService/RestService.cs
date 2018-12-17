@@ -12,12 +12,13 @@ namespace NetService.RestService
         WebServiceHost serviceHost;
         ISerializer source;
         Framerate framerate = new Framerate();
+        private long _totalRequests = 0;
 
         public RestService(ISerializer source)
         {
-            int port = Properties.Settings.Default.PORT;
+            var port = Properties.Settings.Default.PORT;
             this.source = source;
-            Uri url = new Uri("http://localhost:" + port);
+            var url = new Uri("http://localhost:" + port);
             serviceHost = new WebServiceHost(this as IService, url);
 
             Console.WriteLine(url);
@@ -33,17 +34,17 @@ namespace NetService.RestService
         public string Data()
         {
             framerate.MeasureHere();
-            WriteProgress(framerate.FrameRate + " Responses per Second", 5);
+            WriteProgress(framerate.FrameRate + " Responses per Second      ", 5, 5);
+            WriteProgress("Total requests: " + ++_totalRequests, 5, 6);
 
-            byte[] arr = source.getData();
+            var arr = source.getData();
             if (arr == null)
             {
                 Console.WriteLine("Kinect not available");
             }
 
 
-            string base64 = Convert.ToBase64String(arr);
-            WebOperationContext.Current.OutgoingResponse.ContentType = "image/jpeg";
+            var base64 = Convert.ToBase64String(arr);
             return base64;
         }
 
@@ -52,19 +53,19 @@ namespace NetService.RestService
             return source.getSkeletonData();
         }
 
-        protected static void WriteProgress(string s, int x)
+        protected static void WriteProgress(string iString, int x, int iLineNumber)
         {
             // from https://stackoverflow.com/a/49099413
 
-            int origRow = Console.CursorTop;
-            int origCol = Console.CursorLeft;
+            var origRow = Console.CursorTop;
+            var origCol = Console.CursorLeft;
             // Console.WindowWidth = 10;  // this works. 
-            int width = Console.WindowWidth;
+            var width = Console.WindowWidth;
             x = x % width;
             try
             {
-                Console.SetCursorPosition(x, 5);
-                Console.Write(s);
+                Console.SetCursorPosition(x, iLineNumber);
+                Console.Write(iString);
             }
             catch (ArgumentOutOfRangeException)
             {
