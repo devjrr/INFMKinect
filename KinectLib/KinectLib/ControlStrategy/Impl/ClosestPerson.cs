@@ -1,7 +1,6 @@
-﻿using KinectLib.Interfaces;
-using Microsoft.Kinect;
+﻿using Microsoft.Kinect;
 
-namespace KinectLib.ControlStrategy
+namespace KinectLib.ControlStrategy.Impl
 {
     public class ClosestPerson : IControlStrategy
     {

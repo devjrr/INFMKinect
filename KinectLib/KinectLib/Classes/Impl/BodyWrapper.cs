@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KinectLib.Interfaces;
 using Microsoft.Kinect;
 
-namespace KinectLib.Classes
+namespace KinectLib.Classes.Impl
 {
     [Serializable]
     public class BodyWrapper : IBodyWrapper

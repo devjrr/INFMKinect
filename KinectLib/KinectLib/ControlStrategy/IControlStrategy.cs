@@ -1,6 +1,6 @@
 ﻿using Microsoft.Kinect;
 
-namespace KinectLib.Interfaces
+namespace KinectLib.ControlStrategy
 {
     // http://kinect.github.io/tutorial/lab14/index.html
     public interface IControlStrategy

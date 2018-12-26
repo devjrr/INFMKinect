@@ -1,10 +1,11 @@
 ﻿using Microsoft.Kinect;
+using KinectLib.Constants;
 using System;
 
-namespace KinectLib.Classes
+namespace KinectLib.Classes.Impl
 {
     [Serializable]
-    public class ColorPointCloud
+    public class ColorPointCloud : IColorPointCloud
     {
         public ColorPointCloud()
         {
@@ -27,7 +28,7 @@ namespace KinectLib.Classes
 
             var colorWidth = iColorFrame.FrameDescription.Width;
             var colorHeight = iColorFrame.FrameDescription.Height;
-            var colorData = new byte[colorWidth * colorHeight * Constants.BYTES_PER_PIXEL];
+            var colorData = new byte[colorWidth * colorHeight * KinectConstants.BYTES_PER_PIXEL];
             if (iColorFrame.RawColorImageFormat == ColorImageFormat.Bgra)
             {
                 iColorFrame.CopyRawFrameDataToArray(colorData);
@@ -40,7 +41,7 @@ namespace KinectLib.Classes
             var colorPoints = new ColorSpacePoint[Width * Height];
             iCoordinateMapper.MapDepthFrameToColorSpace(depthData, colorPoints);
 
-            var displayPixels = new byte[Width * Height * Constants.BYTES_PER_PIXEL];
+            var displayPixels = new byte[Width * Height * KinectConstants.BYTES_PER_PIXEL];
             Array.Clear(displayPixels, 0, displayPixels.Length);
 
             var bodyDataBool = new bool[Width * Height];
@@ -66,8 +67,8 @@ namespace KinectLib.Classes
 
                         if ((colorX >= 0) && (colorX < colorWidth) && (colorY >= 0) && (colorY < colorHeight))
                         {
-                            var colorIndex = ((colorY * colorWidth) + colorX) * Constants.BYTES_PER_PIXEL;
-                            var displayIndex = depthIndex * Constants.BYTES_PER_PIXEL;
+                            var colorIndex = ((colorY * colorWidth) + colorX) * KinectConstants.BYTES_PER_PIXEL;
+                            var displayIndex = depthIndex * KinectConstants.BYTES_PER_PIXEL;
 
                             displayPixels[displayIndex + 0] = colorData[colorIndex]; // B
                             displayPixels[displayIndex + 1] = colorData[colorIndex + 1]; // G

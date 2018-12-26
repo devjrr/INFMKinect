@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Kinect;
 
-namespace KinectLib.Interfaces
+namespace KinectLib.Classes
 {
     public interface IBodyWrapper
     {

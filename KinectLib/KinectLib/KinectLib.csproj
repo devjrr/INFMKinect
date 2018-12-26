@@ -47,21 +47,24 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\BodyWrapper.cs" />
-    <Compile Include="Classes\ColorPointCloud.cs" />
-    <Compile Include="Classes\Constants.cs" />
-    <Compile Include="Classes\FrameCaptureWrapper.cs" />
-    <Compile Include="Classes\KinectData.cs" />
-    <Compile Include="ControlStrategy\ClosestPerson.cs" />
-    <Compile Include="ControlStrategy\FirstPerson.cs" />
-    <Compile Include="Interfaces\IBodyWrapper.cs" />
-    <Compile Include="Interfaces\IControlStrategy.cs" />
-    <Compile Include="Interfaces\IKinectData.cs" />
+    <Compile Include="Classes\IColorPointCloud.cs" />
+    <Compile Include="Classes\IFrameCaptureWrapper.cs" />
+    <Compile Include="Classes\Impl\BodyWrapper.cs" />
+    <Compile Include="Classes\Impl\ColorPointCloud.cs" />
+    <Compile Include="Constants\KinectConstants.cs" />
+    <Compile Include="Classes\Impl\FrameCaptureWrapper.cs" />
+    <Compile Include="Classes\Impl\KinectData.cs" />
+    <Compile Include="ControlStrategy\Impl\ClosestPerson.cs" />
+    <Compile Include="ControlStrategy\Impl\FirstPerson.cs" />
+    <Compile Include="ControlStrategy\IControlStrategy.cs" />
+    <Compile Include="Classes\IBodyWrapper.cs" />
+    <Compile Include="Classes\IKinectData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if $(ConfigurationName) == Release copy /Y "$(TargetDir)$(ProjectName).dll" "$(SolutionDir)..\dll\$(ProjectName).dll"</PostBuildEvent>

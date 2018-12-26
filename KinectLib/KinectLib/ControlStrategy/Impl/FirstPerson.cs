@@ -1,8 +1,7 @@
-﻿using KinectLib.Interfaces;
-using Microsoft.Kinect;
+﻿using Microsoft.Kinect;
 using System.Linq;
 
-namespace KinectLib.ControlStrategy
+namespace KinectLib.ControlStrategy.Impl
 {
     public class FirstPerson : IControlStrategy
     {

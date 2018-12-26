@@ -1,8 +1,7 @@
-﻿using KinectLib.ControlStrategy;
-using KinectLib.Interfaces;
+﻿using KinectLib.ControlStrategy.Impl;
 using Microsoft.Kinect;
 
-namespace KinectLib.Classes
+namespace KinectLib.Classes.Impl
 {
     public class KinectData : IKinectData
     {

@@ -1,4 +1,4 @@
-﻿namespace KinectLib.Interfaces
+﻿namespace KinectLib.Classes
 {
     public interface IKinectData
     {
