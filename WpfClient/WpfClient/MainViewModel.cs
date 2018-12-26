@@ -1,5 +1,4 @@
 ﻿using KinectLib.Classes;
-using KinectLib.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
@@ -11,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using KinectLib.Classes.Impl;
 using WpfClient.Enums;
 using WpfClient.Extensions;
 using WpfClient.Properties;

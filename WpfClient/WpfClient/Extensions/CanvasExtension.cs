@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using KinectLib.Interfaces;
+using KinectLib.Classes;
 
 namespace WpfClient.Extensions
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using KinectLib.Classes;
+using KinectLib.Constants;
 using NetClientLib;
 
 namespace WpfClient.Extensions
@@ -26,7 +26,7 @@ namespace WpfClient.Extensions
                 buffer[stride * (int)p.GetY() + (int)p.GetX() * bytesPerPixel + 2] = (byte)(p.GetB() * 256);
             }
 
-            return BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
+            return BitmapSource.Create(width, height, KinectConstants.DPI, KinectConstants.DPI, pixelFormat, null, buffer, stride);
         }
 
         public static BitmapSource GenerateDepthBitmap(this IList<CloudPoint> iCloudPoint)
@@ -44,7 +44,7 @@ namespace WpfClient.Extensions
                 buffer[width * (int)p.GetY() + (int)p.GetX()] = (ushort)(p.GetZ() * 256);
             }
 
-            return BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
+            return BitmapSource.Create(width, height, KinectConstants.DPI, KinectConstants.DPI, pixelFormat, null, buffer, stride);
         }
 
         public static BitmapSource GenerateDepthBitmap(this ushort[] iDepthArray, bool[] iBodyArray)
@@ -62,7 +62,7 @@ namespace WpfClient.Extensions
                 buffer[i] = iBodyArray[i] ? (byte)iDepthArray[i] : byte.MinValue;
             }
 
-            return BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, buffer, stride);
+            return BitmapSource.Create(width, height, KinectConstants.DPI, KinectConstants.DPI, pixelFormat, null, buffer, stride);
         }
 
         public static BitmapSource GenerateColorBitmap(this byte[] iColorArray, bool[] iBodyArray)
@@ -73,7 +73,7 @@ namespace WpfClient.Extensions
             const int bytesPerPixel = 3;
             const int stride = bytesPerPixel * width;
 
-            return BitmapSource.Create(width, height, Constants.DPI, Constants.DPI, pixelFormat, null, iColorArray, stride);
+            return BitmapSource.Create(width, height, KinectConstants.DPI, KinectConstants.DPI, pixelFormat, null, iColorArray, stride);
         }
     }
 }

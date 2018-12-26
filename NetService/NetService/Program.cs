@@ -1,11 +1,11 @@
-﻿using KinectLib.Interfaces;
-using NetService.Serializer;
+﻿using NetService.Serializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using KinectLib.Classes;
+using KinectLib.Classes.Impl;
 
 namespace NetService
 {

@@ -1,11 +1,11 @@
-﻿using KinectLib.Interfaces;
-using LZ4;
+﻿using LZ4;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using KinectLib.Classes;
 using Newtonsoft.Json;
 
 namespace NetService.Serializer

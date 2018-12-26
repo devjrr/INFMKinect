@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using KinectLib.Classes;
+using KinectLib.Classes.Impl;
 using WpfClient.Enums;
 using WpfClient.Extensions;
 
@@ -84,7 +84,7 @@ namespace WpfClient
                     SkeletonCanvas.SaveToFile(filename: "skeleton_" + DateTime.Now.Ticks + ".jpg");
                     break;
                 case Enums.TabItem.PointCloud:
-                    FrameCaptureWrapper.SaveImage(_vm.PointCloudImageSource, "pointCloud_" + DateTime.Now.Ticks + ".jpg");
+                    new FrameCaptureWrapper().SaveImage(_vm.PointCloudImageSource, "pointCloud_" + DateTime.Now.Ticks + ".jpg");
                     break;
             }
         }
