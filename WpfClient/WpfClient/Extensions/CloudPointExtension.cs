@@ -49,31 +49,23 @@ namespace WpfClient.Extensions
 
         public static BitmapSource GenerateDepthBitmap(this ushort[] iDepthArray, bool[] iBodyArray)
         {
-            const int width = 512;
-            const int height = 424;
-            var pixelFormat = PixelFormats.Gray8;
-            const int bytesPerPixel = 1;
-            const int stride = bytesPerPixel * width;
+            const int stride = KinectConstants.DepthBitmapBytesPerPixel * KinectConstants.BitmapWidth;
 
-            var buffer = new byte[width * height];
+            var buffer = new byte[KinectConstants.BitmapWidth * KinectConstants.BitmapHeight];
 
             for (var i = 0; i < iDepthArray.Length; i++)
             {
                 buffer[i] = iBodyArray[i] ? (byte)iDepthArray[i] : byte.MinValue;
             }
 
-            return BitmapSource.Create(width, height, KinectConstants.DPI, KinectConstants.DPI, pixelFormat, null, buffer, stride);
+            return BitmapSource.Create(KinectConstants.BitmapWidth, KinectConstants.BitmapHeight, KinectConstants.DPI, KinectConstants.DPI, KinectConstants.DepthBitmapPixelFormat, null, buffer, stride);
         }
 
         public static BitmapSource GenerateColorBitmap(this byte[] iColorArray, bool[] iBodyArray)
         {
-            const int width = 512;
-            const int height = 424;
-            var pixelFormat = PixelFormats.Bgr24;
-            const int bytesPerPixel = 3;
-            const int stride = bytesPerPixel * width;
+            const int stride = KinectConstants.ColorBitmapBytesPerPixel * KinectConstants.BitmapWidth;
 
-            return BitmapSource.Create(width, height, KinectConstants.DPI, KinectConstants.DPI, pixelFormat, null, iColorArray, stride);
+            return BitmapSource.Create(KinectConstants.BitmapWidth, KinectConstants.BitmapHeight, KinectConstants.DPI, KinectConstants.DPI, KinectConstants.ColorBitmapPixelFormat, null, iColorArray, stride);
         }
     }
 }

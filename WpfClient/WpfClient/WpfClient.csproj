@@ -61,6 +61,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\dll\KinectLib.dll</HintPath>
     </Reference>
+    <Reference Include="LightBuzz.Vitruvius">
+      <HintPath>..\..\ExterneLibs\LightBuzz.Vitruvius.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
