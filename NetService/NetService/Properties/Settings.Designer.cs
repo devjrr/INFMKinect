@@ -34,5 +34,17 @@ namespace NetService.Properties {
                 this["PORT"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool PRESENTATION_MODE {
+            get {
+                return ((bool)(this["PRESENTATION_MODE"]));
+            }
+            set {
+                this["PRESENTATION_MODE"] = value;
+            }
+        }
     }
 }

@@ -9,5 +9,7 @@ namespace NetService
     interface INetService
     {
         void run();
+
+        void Terminate();
     }
 }

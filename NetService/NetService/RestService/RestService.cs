@@ -9,20 +9,26 @@ namespace NetService.RestService
                  ConcurrencyMode = ConcurrencyMode.Single, IncludeExceptionDetailInFaults = true)]
     class RestService : INetService, IService
     {
-        WebServiceHost serviceHost;
-        ISerializer source;
-        Framerate framerate = new Framerate();
-        private long _totalRequests = 0;
+        #region Fields
 
-        public RestService(ISerializer source)
+        private const string KinectNotAvailable = "Kinect not available";
+
+        private readonly WebServiceHost _serviceHost;
+        private readonly ISerializer _source;
+        private readonly Framerate _framerate = new Framerate();
+        private long _totalRequests;
+        #endregion
+
+        #region Constructor
+        public RestService(ISerializer iSource)
         {
             var port = Properties.Settings.Default.PORT;
-            this.source = source;
+            _source = iSource;
             var url = new Uri("http://localhost:" + port);
-            serviceHost = new WebServiceHost(this as IService, url);
+            _serviceHost = new WebServiceHost(this, url);
 
             Console.WriteLine(url);
-            foreach (MemberInfo info in typeof(IService).GetMembers())
+            foreach (var info in typeof(IService).GetMembers())
             {
                 if (info.MemberType == MemberTypes.Method)
                 {
@@ -30,17 +36,18 @@ namespace NetService.RestService
                 }
             }
         }
+        #endregion
 
+        #region Methods
         public string Data()
         {
-            framerate.MeasureHere();
-            WriteProgress(framerate.FrameRate + " Responses per Second      ", 5, 5);
-            WriteProgress("Total requests: " + ++_totalRequests, 5, 6);
+            PrintProgress();
 
-            var arr = source.getData();
+            var arr = _source.getData();
             if (arr == null)
             {
-                Console.WriteLine("Kinect not available");
+                Console.WriteLine(KinectNotAvailable);
+                return string.Empty;
             }
 
 
@@ -50,7 +57,21 @@ namespace NetService.RestService
 
         public string SkeletonData()
         {
-            return source.getSkeletonData();
+            PrintProgress();
+
+            var data = _source.getSkeletonData();
+            if (!string.IsNullOrEmpty(data)) return data;
+
+            Console.WriteLine(KinectNotAvailable);
+            return string.Empty;
+
+        }
+
+        private void PrintProgress()
+        {
+            _framerate.MeasureHere();
+            WriteProgress(_framerate.FrameRate + " Responses per Second      ", 5, 5);
+            WriteProgress("Total requests: " + ++_totalRequests, 5, 6);
         }
 
         protected static void WriteProgress(string iString, int x, int iLineNumber)
@@ -85,30 +106,30 @@ namespace NetService.RestService
 
         public void run()
         {
-            serviceHost.Open();
+            _serviceHost.Open();
             Console.ReadLine();
-            serviceHost.Close();
+            _serviceHost.Close();
+        }
+
+        public void Terminate()
+        {
+            _serviceHost.Close();
         }
 
         public string Status()
         {
-            byte[] data = null;
+            byte[] data;
             try
             {
-                data = source.getData();
+                data = _source.getData();
             }
             catch
             {
                 return "offline";
             }
 
-            if (data == null)
-            {
-                return "offline";
-            }
-
-            return "online";
-
+            return data == null ? "offline" : "online";
         }
+        #endregion
     }
 }

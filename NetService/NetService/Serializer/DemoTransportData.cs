@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace NetService.Serializer
 {
     class DemoTransportData : ISerializer
     {
-        private const string prefix = "Data_jpg";
-        private const string suffix = ".txt";
-        private const int fileCount = 10;
+        private const string Prefix = "Data_jpg";
+        private const string Suffix = ".txt";
+        private const int FileCount = 10;
 
-        private const string errorText = @"
+        private const string ErrorText = @"
 Error:
 Please place Debug-Data in the same folder as the .exe:
 
@@ -32,32 +28,69 @@ Data_jpg9.txt
 
 Do NOT commit Debug-Data to GitHub.";
 
+        private const string SkeletonErrorText = @"
+Error:
+Please place Debug-Data in the same folder as the .exe:
 
-        private List<byte[]> demoData;
-        private int currentIndex = 0;
+e.g: \INFMKinect\NetService\bin\Debug
+
+The files must be named after following schema(remember to start with 0 and end with 9) :
+
+Data_skeleten0.txt
+Data_skeleten1.txt
+Data_skeleten2.txt
+Data_skeleten3.txt
+...
+Data_skeleten9.txt
+
+Do NOT commit Debug-Data to GitHub.";
 
 
+        private readonly List<byte[]> _demoData;
+        private readonly List<string> _demoSkeletonData;
+        private int _currentIndex;
 
         private DemoTransportData()
         {
-            demoData = new List<byte[]>();
+            _demoData = new List<byte[]>();
+            _demoSkeletonData = new List<string>();
         }
 
         public static ISerializer ReadfromLocalFiles()
         {
-            DemoTransportData dtd = new DemoTransportData();
+            var dtd = new DemoTransportData();
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < FileCount; i++)
             {
-                string fileName = prefix + i + suffix;
+                var fileName = Prefix + i + Suffix;
                 try
                 {
-                    byte[] data = dtd.readDemoDataFromFile(fileName);
-                    dtd.demoData.Add(data);
+                    var data = dtd.ReadDemoDataFromFile(fileName);
+                    dtd._demoData.Add(data);
                 }
                 catch (FileNotFoundException e)
                 {
-                    Console.WriteLine(errorText);
+                    Console.WriteLine(ErrorText);
+                    Console.WriteLine("Exception: " + e.FileName + " not found!");
+                }
+
+            }
+
+            for (var i = 0; i < FileCount; i++)
+            {
+                var fileName = "Data_skeleton" + i + ".json";
+                try
+                {
+                    var data = File.ReadAllText(fileName);
+                    /*var xml = new XmlDocument();
+                    xml.LoadXml(data);
+                    var inner = xml.FirstChild.InnerText;*/
+
+                    dtd._demoSkeletonData.Add(data);
+                }
+                catch (FileNotFoundException e)
+                {
+                    Console.WriteLine(SkeletonErrorText);
                     Console.WriteLine("Exception: " + e.FileName + " not found!");
                 }
 
@@ -66,36 +99,36 @@ Do NOT commit Debug-Data to GitHub.";
             return dtd;
         }
 
-        private byte[] readDemoDataFromFile(string fileName)
+        private byte[] ReadDemoDataFromFile(string fileName)
         {
-            string contents = File.ReadAllText(fileName);
+            var contents = File.ReadAllText(fileName);
 
-            XmlDocument xml = new XmlDocument();
+            var xml = new XmlDocument();
             xml.LoadXml(contents);
-            string inner = xml.FirstChild.InnerText;
+            var inner = xml.FirstChild.InnerText;
 
             return Convert.FromBase64String(inner);
         }
 
         public byte[] getData()
         {
-            if (demoData.Count == fileCount)
-            {
-                byte[] data = demoData[currentIndex];
-                currentIndex++;
-                currentIndex %= fileCount;
-                return data;
-            }
-            else
-            {
-                return new byte[] { 0x00 };
-            }
+            if (_demoData.Count != FileCount) return new byte[] {0x00};
+
+            var data = _demoData[_currentIndex];
+            _currentIndex++;
+            _currentIndex %= FileCount;
+            return data;
 
         }
 
         public string getSkeletonData()
         {
-            throw new NotImplementedException("Not working in Demo-Mode");
+            if (_demoSkeletonData.Count != FileCount) return string.Empty;
+
+            var data = _demoSkeletonData[_currentIndex];
+            _currentIndex++;
+            _currentIndex %= FileCount;
+            return data;
         }
     }
 }
