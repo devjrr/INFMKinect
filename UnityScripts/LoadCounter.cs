@@ -12,6 +12,7 @@ namespace NetClientLib
         private int lastTick;
         private float lastLoad;
         private float load;
+
         public void MeasureHere(float addLoad)
         {
             int elapsed = Environment.TickCount - lastTick;
@@ -21,13 +22,13 @@ namespace NetClientLib
                 load = 0;
                 lastTick = Environment.TickCount;
             }
+
             load += addLoad;
         }
+
         public float Load
         {
             get { return lastLoad; }
-
-
         }
     }
 }
