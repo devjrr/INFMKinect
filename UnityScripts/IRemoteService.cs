@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace NetClientLib
 {
     public interface IRemoteService
     {
         IList<CloudPoint> GetCloudpoints();
+
+        IList<CloudPoint> GetSkeleton();
+        
+        string GetSkeletonData();
 
         bool isServerOnline();
 
