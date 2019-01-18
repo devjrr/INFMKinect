@@ -50,10 +50,10 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>server.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="KinectLib">
-      <HintPath>..\..\dll\KinectLib.dll</HintPath>
-    </Reference>
     <Reference Include="LZ4">
       <HintPath>..\..\ExterneLibs\LZ4.dll</HintPath>
     </Reference>
@@ -109,5 +109,17 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\KinectLib\KinectLib\KinectLib.csproj">
+      <Project>{36d7a1ed-ed64-48df-9b4d-c20fe61ad549}</Project>
+      <Name>KinectLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="server.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Release copy /Y "$(TargetDir)" "$(SolutionDir)..\public\Server\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

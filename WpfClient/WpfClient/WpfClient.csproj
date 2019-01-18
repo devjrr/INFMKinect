@@ -53,13 +53,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>kinect.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net45\ControlzEx.dll</HintPath>
-    </Reference>
-    <Reference Include="KinectLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\dll\KinectLib.dll</HintPath>
     </Reference>
     <Reference Include="LightBuzz.Vitruvius">
       <HintPath>..\..\ExterneLibs\LightBuzz.Vitruvius.dll</HintPath>
@@ -68,9 +67,6 @@
       <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Kinect, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=x86" />
-    <Reference Include="NetClientLib">
-      <HintPath>..\..\dll\NetClientLib.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -144,9 +140,21 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="kinect.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\KinectLib\KinectLib\KinectLib.csproj">
+      <Project>{36d7a1ed-ed64-48df-9b4d-c20fe61ad549}</Project>
+      <Name>KinectLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\NetClientLib\NetClientLib\NetClientLib.csproj">
+      <Project>{61c8baa4-d8a9-4601-8a70-e3d00c893c6d}</Project>
+      <Name>NetClientLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == Release copy /Y "$(TargetDir)" "$(SolutionDir)..\public\WpfClient\"</PostBuildEvent>
   </PropertyGroup>
 </Project>
